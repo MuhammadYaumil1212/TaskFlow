@@ -5,17 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import yr.muhammadyaumil.taskflow.ui.theme.TaskFlowTheme
+import yr.muhammadyaumil.taskflow.presentations.navigations.AppNavHost
+import yr.muhammadyaumil.taskflow.presentations.theme.TaskFlowTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        installSplashScreen()
-        setContent {
-            TaskFlowTheme {
-
-            }
-        }
+        setContent { TaskFlowTheme { AppNavHost() } }
     }
 }

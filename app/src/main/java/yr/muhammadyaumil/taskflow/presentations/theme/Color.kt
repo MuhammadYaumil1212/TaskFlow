@@ -1,4 +1,4 @@
-package com.example.compose
+package yr.muhammadyaumil.taskflow.presentations.theme
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF405F91)

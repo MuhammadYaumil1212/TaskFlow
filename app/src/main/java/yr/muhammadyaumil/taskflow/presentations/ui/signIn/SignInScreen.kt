@@ -28,12 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import yr.muhammadyaumil.taskflow.R
@@ -41,7 +41,11 @@ import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.LoginButton
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.SignInTextField
 
 @Composable
-fun SignInScreen(modifier: Modifier = Modifier) {
+fun SignInScreen(
+    modifier: Modifier = Modifier,
+    onSignUpClick: () -> Unit,
+    onForgotPassClick: (offset: Offset) -> Unit
+) {
     Scaffold(modifier = modifier) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
@@ -54,7 +58,11 @@ fun SignInScreen(modifier: Modifier = Modifier) {
                 item {
                     HeaderLogo()
                     Spacer(modifier = Modifier.height(20.dp))
-                    LoginForm(onClick = {})
+                    LoginForm(
+                        onSignInClick = { },
+                        onSignUpClick = onSignUpClick,
+                        onForgotPassClick = onForgotPassClick
+                    )
                 }
             }
         }
@@ -90,7 +98,9 @@ fun HeaderLogo(modifier: Modifier = Modifier) {
 @Composable
 fun LoginForm(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
+    onSignInClick: () -> Unit,
+    onSignUpClick: () -> Unit,
+    onForgotPassClick: (offset: Offset) -> Unit
 ) {
     var usernameText by remember { mutableStateOf("") }
     var passwordText by remember { mutableStateOf("") }
@@ -113,7 +123,7 @@ fun LoginForm(
         Text(
             modifier = Modifier
                 .pointerInput(Unit) {
-                    detectTapGestures(onTap = {})
+                    detectTapGestures(onTap = onForgotPassClick)
                 },
             text = "Lupa Password ? ",
             fontSize = 12.sp,
@@ -123,7 +133,7 @@ fun LoginForm(
     }
     Spacer(modifier = Modifier.height(15.dp))
     ElevatedButton(
-        onClick = onClick,
+        onClick = onSignInClick,
         shape = RoundedCornerShape(size = 10.dp),
         colors = ButtonDefaults.buttonColors(
             MaterialTheme
@@ -139,7 +149,7 @@ fun LoginForm(
         )
     }
     OutlinedButton(
-        onClick = onClick,
+        onClick = onSignUpClick,
         shape = RoundedCornerShape(size = 10.dp),
         colors = ButtonDefaults.buttonColors(
             Color.White
@@ -182,10 +192,4 @@ fun LoginForm(
         onClick = {},
     )
 
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoginPreview() {
-    SignInScreen()
 }

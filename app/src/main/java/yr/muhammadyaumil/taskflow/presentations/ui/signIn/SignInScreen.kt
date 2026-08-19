@@ -37,8 +37,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import yr.muhammadyaumil.taskflow.R
+import yr.muhammadyaumil.taskflow.presentations.ui.components.AppTextField
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.LoginButtonWithSocialMedia
-import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.SignInTextField
 
 @Composable
 fun SignInScreen(
@@ -86,7 +86,7 @@ fun HeaderLogo(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                "Masuk ke Dalam Akun mu",
+                "Daftar Terlebih Dahulu",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.secondary
@@ -105,14 +105,15 @@ fun LoginForm(
     var usernameText by remember { mutableStateOf("") }
     var passwordText by remember { mutableStateOf("") }
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.End) {
-        SignInTextField(
+        AppTextField(
             modifier = Modifier,
             text = "Username",
             hint = "Masukkan Username",
             valueText = usernameText,
             onValueChanged = { usernameText = it })
+
         Spacer(modifier = Modifier.height(15.dp))
-        SignInTextField(
+        AppTextField(
             modifier = Modifier,
             text = "Password",
             "Masukkan Password Anda",

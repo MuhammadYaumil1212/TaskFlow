@@ -1,4 +1,4 @@
-package yr.muhammadyaumil.taskflow.presentations.ui.signIn.components
+package yr.muhammadyaumil.taskflow.presentations.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,7 +22,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SignInTextField(
+fun AppTextField(
     modifier: Modifier = Modifier,
     text: String,
     hint: String,

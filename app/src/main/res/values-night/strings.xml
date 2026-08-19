@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="btn_login_text">Masuk</string>
+    <string name="sign_up_btn_text">Daftar</string>
 </resources>

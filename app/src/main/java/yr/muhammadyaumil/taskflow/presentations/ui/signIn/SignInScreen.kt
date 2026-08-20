@@ -46,6 +46,8 @@ fun SignInScreen(
     onSignUpClick: () -> Unit,
     onForgotPassClick: (offset: Offset) -> Unit
 ) {
+    var usernameText by remember { mutableStateOf("") }
+    var passwordText by remember { mutableStateOf("") }
     Scaffold(modifier = modifier) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
@@ -59,9 +61,15 @@ fun SignInScreen(
                     HeaderLogo()
                     Spacer(modifier = Modifier.height(20.dp))
                     LoginForm(
+                        usernameText = usernameText,
+                        passwordText = passwordText,
+                        onUsernameChanged = { usernameText = it },
+                        onPasswordChanged = { passwordText = it },
                         onSignInClick = { },
                         onSignUpClick = onSignUpClick,
-                        onForgotPassClick = onForgotPassClick
+                        onForgotPassClick = onForgotPassClick,
+                        onTapFacebookLogin = {},
+                        onTapGoogleLogin = {}
                     )
                 }
             }
@@ -97,29 +105,36 @@ fun HeaderLogo(modifier: Modifier = Modifier) {
 
 @Composable
 fun LoginForm(
+    usernameText: String,
+    passwordText: String,
+    onUsernameChanged: (String) -> Unit,
+    onPasswordChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
     onSignInClick: () -> Unit,
     onSignUpClick: () -> Unit,
-    onForgotPassClick: (offset: Offset) -> Unit
+    onForgotPassClick: (offset: Offset) -> Unit,
+    onTapGoogleLogin: () -> Unit,
+    onTapFacebookLogin: () -> Unit
 ) {
-    var usernameText by remember { mutableStateOf("") }
-    var passwordText by remember { mutableStateOf("") }
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.End) {
         AppTextField(
             modifier = Modifier,
             text = "Username",
             hint = "Masukkan Username",
             valueText = usernameText,
-            onValueChanged = { usernameText = it })
+            onValueChanged = onUsernameChanged
+        )
 
         Spacer(modifier = Modifier.height(15.dp))
+
         AppTextField(
             modifier = Modifier,
             text = "Password",
             "Masukkan Password Anda",
             isPassword = true,
             valueText = passwordText,
-            onValueChanged = { passwordText = it })
+            onValueChanged = onPasswordChanged
+        )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             modifier = Modifier
@@ -137,33 +152,35 @@ fun LoginForm(
         onClick = onSignInClick,
         shape = RoundedCornerShape(size = 10.dp),
         colors = ButtonDefaults.buttonColors(
-            MaterialTheme
-                .colorScheme
-                .primary
+            MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text(
-            stringResource(
-                R.string.btn_login_text
-            )
-        )
+        Text(stringResource(R.string.btn_login_text))
     }
     OutlinedButton(
         onClick = onSignUpClick,
         shape = RoundedCornerShape(size = 10.dp),
-        colors = ButtonDefaults.buttonColors(
-            Color.White
-        ),
+        colors = ButtonDefaults.buttonColors(Color.White),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text(
-            stringResource(R.string.sign_up_text),
-            color = Color.Black
-        )
+        Text(stringResource(R.string.sign_up_text), color = Color.Black)
     }
     Spacer(modifier = Modifier.height(20.dp))
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    DividerOrLoginWith()
+    Spacer(modifier = Modifier.height(25.dp))
+    OneTapLogin(
+        onTapGoogleLogin = onTapGoogleLogin,
+        onTapFacebookLogin = onTapFacebookLogin
+    )
+}
+
+@Composable
+fun DividerOrLoginWith(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         HorizontalDivider(
             Modifier.width(110.dp),
             DividerDefaults.Thickness,
@@ -178,19 +195,27 @@ fun LoginForm(
         Spacer(modifier = Modifier.width(5.dp))
         HorizontalDivider(Modifier.width(110.dp), DividerDefaults.Thickness, DividerDefaults.color)
     }
-    Spacer(modifier = Modifier.height(25.dp))
-    LoginButtonWithSocialMedia(
-        modifier = Modifier,
-        icon = painterResource(R.drawable.ic_google),
-        text = "Google",
-        onClick = {},
-    )
-    Spacer(modifier = Modifier.height(15.dp))
-    LoginButtonWithSocialMedia(
-        modifier = Modifier,
-        icon = painterResource(R.drawable.ic_facebook),
-        text = "Facebook",
-        onClick = {},
-    )
+}
 
+@Composable
+fun OneTapLogin(
+    modifier: Modifier = Modifier,
+    onTapGoogleLogin: () -> Unit,
+    onTapFacebookLogin: () -> Unit
+) {
+    Column(modifier = modifier) {
+        LoginButtonWithSocialMedia(
+            modifier = Modifier,
+            icon = painterResource(R.drawable.ic_google),
+            text = "Google",
+            onClick = onTapGoogleLogin,
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+        LoginButtonWithSocialMedia(
+            modifier = Modifier,
+            icon = painterResource(R.drawable.ic_facebook),
+            text = "Facebook",
+            onClick = onTapFacebookLogin,
+        )
+    }
 }

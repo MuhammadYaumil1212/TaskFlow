@@ -34,11 +34,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import yr.muhammadyaumil.taskflow.R
 import yr.muhammadyaumil.taskflow.presentations.components.AppTextField
-import yr.muhammadyaumil.taskflow.presentations.ui.signIn.HeaderLogo
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.LoginButtonWithSocialMedia
 
 @Composable
 fun SignUpScreen(modifier: Modifier = Modifier) {
+    var usernameText by remember { mutableStateOf("") }
+    var emailText by remember { mutableStateOf("") }
+    var passwordText by remember { mutableStateOf("") }
+    var confirmPasswordText by remember { mutableStateOf("") }
     Scaffold(modifier = modifier.fillMaxSize()) { paddingValues ->
         Box(
             modifier = Modifier
@@ -58,8 +61,17 @@ fun SignUpScreen(modifier: Modifier = Modifier) {
                             HeaderLogo()
                             Spacer(modifier = Modifier.height(20.dp))
                             RegisterForm(
+                                usernameText = usernameText,
+                                passwordText = passwordText,
+                                emailText = emailText,
+                                confirmPasswordText = confirmPasswordText,
+                                emailValueChanged = {},
+                                usernameValueChanged = {},
+                                passwordValueChanged = {},
+                                confirmPasswordValueChanged = {},
+                                oneTapGoogleLogin = {},
+                                oneTapFacebookLogin = {},
                                 onSignUpClick = {},
-                                onSignInClick = { },
                             )
                         }
                     }
@@ -98,27 +110,37 @@ fun HeaderLogo(modifier: Modifier = Modifier) {
 @Composable
 fun RegisterForm(
     modifier: Modifier = Modifier,
-    onSignInClick: () -> Unit,
+    usernameText: String,
+    emailText: String,
+    passwordText: String,
+    confirmPasswordText: String,
+    emailValueChanged: (String) -> Unit,
+    usernameValueChanged: (String) -> Unit,
+    passwordValueChanged: (String) -> Unit,
+    confirmPasswordValueChanged: (String) -> Unit,
+    oneTapGoogleLogin: () -> Unit,
+    oneTapFacebookLogin: () -> Unit,
     onSignUpClick: () -> Unit
 ) {
-    var usernameText by remember { mutableStateOf("") }
-    var emailText by remember { mutableStateOf("") }
-    var passwordText by remember { mutableStateOf("") }
-    var confirmPasswordText by remember { mutableStateOf("") }
-    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.End) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         AppTextField(
             modifier = Modifier,
             text = "Email",
             hint = "Masukkan Email",
             valueText = emailText,
-            onValueChanged = { emailText = it })
+            onValueChanged = emailValueChanged
+        )
         Spacer(modifier = Modifier.height(15.dp))
         AppTextField(
             modifier = Modifier,
             text = "Username",
             hint = "Masukkan Username",
             valueText = usernameText,
-            onValueChanged = { usernameText = it })
+            onValueChanged = usernameValueChanged
+        )
         Spacer(modifier = Modifier.height(15.dp))
         AppTextField(
             modifier = Modifier,
@@ -126,7 +148,8 @@ fun RegisterForm(
             "Masukkan Password Anda",
             isPassword = true,
             valueText = passwordText,
-            onValueChanged = { passwordText = it })
+            onValueChanged = passwordValueChanged
+        )
         Spacer(modifier = Modifier.height(15.dp))
         AppTextField(
             modifier = Modifier,
@@ -134,11 +157,12 @@ fun RegisterForm(
             hint = "Konfirmasi Password Anda",
             isPassword = true,
             valueText = confirmPasswordText,
-            onValueChanged = { confirmPasswordText = it })
+            onValueChanged = confirmPasswordValueChanged
+        )
     }
     Spacer(modifier = Modifier.height(15.dp))
     ElevatedButton(
-        onClick = onSignInClick,
+        onClick = onSignUpClick,
         shape = RoundedCornerShape(size = 10.dp),
         colors = ButtonDefaults.buttonColors(
             MaterialTheme
@@ -152,6 +176,16 @@ fun RegisterForm(
         )
     }
     Spacer(modifier = Modifier.height(20.dp))
+    DividerOrRegisterWith()
+    Spacer(modifier = Modifier.height(25.dp))
+    OneTapLogin(
+        onTapGoogleLogin = oneTapGoogleLogin,
+        onTapFacebookLogin = oneTapFacebookLogin,
+    )
+}
+
+@Composable
+fun DividerOrRegisterWith() {
     Row(verticalAlignment = Alignment.CenterVertically) {
         HorizontalDivider(
             Modifier.width(110.dp),
@@ -167,19 +201,27 @@ fun RegisterForm(
         Spacer(modifier = Modifier.width(5.dp))
         HorizontalDivider(Modifier.width(110.dp), DividerDefaults.Thickness, DividerDefaults.color)
     }
-    Spacer(modifier = Modifier.height(25.dp))
-    LoginButtonWithSocialMedia(
-        modifier = Modifier,
-        icon = painterResource(R.drawable.ic_google),
-        text = "Google",
-        onClick = {},
-    )
-    Spacer(modifier = Modifier.height(15.dp))
-    LoginButtonWithSocialMedia(
-        modifier = Modifier,
-        icon = painterResource(R.drawable.ic_facebook),
-        text = "Facebook",
-        onClick = {},
-    )
+}
 
+@Composable
+fun OneTapLogin(
+    modifier: Modifier = Modifier,
+    onTapGoogleLogin: () -> Unit,
+    onTapFacebookLogin: () -> Unit
+) {
+    Column(modifier = modifier) {
+        LoginButtonWithSocialMedia(
+            modifier = Modifier,
+            icon = painterResource(R.drawable.ic_google),
+            text = "Google",
+            onClick = onTapGoogleLogin,
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+        LoginButtonWithSocialMedia(
+            modifier = Modifier,
+            icon = painterResource(R.drawable.ic_facebook),
+            text = "Facebook",
+            onClick = onTapFacebookLogin,
+        )
+    }
 }

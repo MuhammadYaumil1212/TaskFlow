@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.gms.google.services)
 }
 
 android {
@@ -75,5 +76,13 @@ dependencies {
 
     //icon
     implementation(libs.androidx.compose.material.icons.extended)
+
+    //firebase & play services
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.googleid)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
 
 }

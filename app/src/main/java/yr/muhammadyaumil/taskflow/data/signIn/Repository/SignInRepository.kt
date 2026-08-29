@@ -1,6 +1,7 @@
 package yr.muhammadyaumil.taskflow.data.signIn.Repository
 
 import android.util.Log
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.signIn.DataSources.AuthRemote
 import yr.muhammadyaumil.taskflow.data.signIn.models.AuthResult
@@ -34,6 +35,9 @@ class SignInRepositoryImpl @Inject constructor(private val authRemote: AuthRemot
             Response.Error(e.message ?: "Something went wrong")
         } catch (e: UnknownHostException) {
             Log.e("CONNECTION ERROR ", e.message ?: "Something went wrong")
+            Response.Error(e.message ?: "Something went wrong")
+        } catch (e: GetCredentialCancellationException) {
+            Log.e("CANCELLATION ERROR", e.message ?: "Something went wrong")
             Response.Error(e.message ?: "Something went wrong")
         }
     }

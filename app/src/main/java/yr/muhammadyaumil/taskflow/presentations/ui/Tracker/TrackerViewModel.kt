@@ -22,8 +22,9 @@ class TrackerViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             _logoutResult.value = Response.Loading
-            val isLoggedOut = signInRepository.logout()
-            _logoutResult.value = isLoggedOut
+            val result = signInRepository.logout()
+            _logoutResult.value = result
+            
         }
     }
 }

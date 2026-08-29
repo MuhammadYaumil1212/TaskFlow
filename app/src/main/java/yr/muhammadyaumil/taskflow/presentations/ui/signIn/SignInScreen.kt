@@ -20,8 +20,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,18 +41,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import yr.muhammadyaumil.taskflow.R
+import yr.muhammadyaumil.taskflow.core.components.LoadingSpinner
+import yr.muhammadyaumil.taskflow.core.response.Response
+import yr.muhammadyaumil.taskflow.data.signIn.models.AuthResult
 import yr.muhammadyaumil.taskflow.presentations.components.AppTextField
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.LoginButtonWithSocialMedia
 
 @Composable
 fun SignInScreen(
     modifier: Modifier = Modifier,
+    authState: Response<AuthResult>?,
     onSignUpClick: () -> Unit,
+    onTapGoogleLogin: () -> Unit,
     onForgotPassClick: (offset: Offset) -> Unit
 ) {
     var usernameText by remember { mutableStateOf("") }
     var passwordText by remember { mutableStateOf("") }
-    Scaffold(modifier = modifier) { innerPadding ->
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(authState) {
+        if (authState is Response.Error) {
+            snackbarHostState.showSnackbar(
+                message = authState.message,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+    Scaffold(
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
                 modifier = Modifier
@@ -69,10 +91,14 @@ fun SignInScreen(
                         onSignUpClick = onSignUpClick,
                         onForgotPassClick = onForgotPassClick,
                         onTapFacebookLogin = {},
-                        onTapGoogleLogin = {}
+                        onTapGoogleLogin = onTapGoogleLogin
                     )
                 }
             }
+        }
+
+        if (authState is Response.Loading) {
+            LoadingSpinner()
         }
     }
 }

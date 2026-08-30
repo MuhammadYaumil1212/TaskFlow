@@ -19,12 +19,13 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -33,16 +34,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import yr.muhammadyaumil.taskflow.R
+import yr.muhammadyaumil.taskflow.core.components.LoadingSpinner
+import yr.muhammadyaumil.taskflow.core.response.Response
+import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
 import yr.muhammadyaumil.taskflow.presentations.components.AppTextField
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.LoginButtonWithSocialMedia
 
 @Composable
-fun SignUpScreen(modifier: Modifier = Modifier) {
-    var usernameText by remember { mutableStateOf("") }
-    var emailText by remember { mutableStateOf("") }
-    var passwordText by remember { mutableStateOf("") }
-    var confirmPasswordText by remember { mutableStateOf("") }
-    Scaffold(modifier = modifier.fillMaxSize()) { paddingValues ->
+fun SignUpScreen(
+    modifier: Modifier = Modifier,
+    usernameText: String,
+    emailText: String,
+    passwordText: String,
+    confirmPasswordText: String,
+    emailValueChanged: (String) -> Unit,
+    usernameValueChanged: (String) -> Unit,
+    passwordValueChanged: (String) -> Unit,
+    confirmPasswordValueChanged: (String) -> Unit,
+    onTapSignUp: () -> Unit,
+    onClearError: () -> Unit,
+    authState: Response<AuthResult>?
+) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(authState) {
+        if (authState is Response.Error) {
+            snackbarHostState.showSnackbar(
+                message = authState.message,
+                duration = SnackbarDuration.Short
+            )
+            onClearError()
+        }
+    }
+
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .padding(paddingValues)
@@ -61,20 +89,24 @@ fun SignUpScreen(modifier: Modifier = Modifier) {
                             HeaderLogo()
                             Spacer(modifier = Modifier.height(20.dp))
                             RegisterForm(
+                                authState = authState,
                                 usernameText = usernameText,
                                 passwordText = passwordText,
                                 emailText = emailText,
                                 confirmPasswordText = confirmPasswordText,
-                                emailValueChanged = {},
-                                usernameValueChanged = {},
-                                passwordValueChanged = {},
-                                confirmPasswordValueChanged = {},
+                                emailValueChanged = emailValueChanged,
+                                usernameValueChanged = usernameValueChanged,
+                                passwordValueChanged = passwordValueChanged,
+                                confirmPasswordValueChanged = confirmPasswordValueChanged,
                                 oneTapGoogleLogin = {},
                                 oneTapFacebookLogin = {},
-                                onSignUpClick = {},
+                                onSignUpClick = onTapSignUp,
                             )
                         }
                     }
+                }
+                if (authState is Response.Loading) {
+                    LoadingSpinner()
                 }
             }
         }
@@ -109,6 +141,7 @@ fun HeaderLogo(modifier: Modifier = Modifier) {
 
 @Composable
 fun RegisterForm(
+    authState: Response<AuthResult>?,
     modifier: Modifier = Modifier,
     usernameText: String,
     emailText: String,
@@ -122,6 +155,8 @@ fun RegisterForm(
     oneTapFacebookLogin: () -> Unit,
     onSignUpClick: () -> Unit
 ) {
+    val isFormError = authState is Response.Error
+
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -131,6 +166,7 @@ fun RegisterForm(
             text = "Email",
             hint = "Masukkan Email",
             valueText = emailText,
+            isError = isFormError && emailText.isBlank(),
             onValueChanged = emailValueChanged
         )
         Spacer(modifier = Modifier.height(15.dp))
@@ -138,6 +174,7 @@ fun RegisterForm(
             modifier = Modifier,
             text = "Username",
             hint = "Masukkan Username",
+            isError = isFormError && usernameText.isBlank(),
             valueText = usernameText,
             onValueChanged = usernameValueChanged
         )
@@ -148,6 +185,7 @@ fun RegisterForm(
             "Masukkan Password Anda",
             isPassword = true,
             valueText = passwordText,
+            isError = isFormError && passwordText.isBlank(),
             onValueChanged = passwordValueChanged
         )
         Spacer(modifier = Modifier.height(15.dp))
@@ -157,6 +195,11 @@ fun RegisterForm(
             hint = "Konfirmasi Password Anda",
             isPassword = true,
             valueText = confirmPasswordText,
+            isError = isFormError && (
+                    confirmPasswordText.isBlank()
+                            || passwordText
+                            != confirmPasswordText
+                    ),
             onValueChanged = confirmPasswordValueChanged
         )
     }
@@ -194,7 +237,7 @@ fun DividerOrRegisterWith() {
         )
         Spacer(modifier = Modifier.width(5.dp))
         Text(
-            text = "Atau Daftar Dengan", fontSize = 14.sp,
+            text = "Atau Daftar Dengan", fontSize = 12.sp,
             color = MaterialTheme.colorScheme.secondary,
             fontWeight = FontWeight.Bold
         )

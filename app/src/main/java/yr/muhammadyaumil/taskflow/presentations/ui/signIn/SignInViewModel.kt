@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import yr.muhammadyaumil.taskflow.core.response.Response
-import yr.muhammadyaumil.taskflow.data.signIn.Repository.SignInRepository
-import yr.muhammadyaumil.taskflow.data.signIn.models.AuthResult
+import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
+import yr.muhammadyaumil.taskflow.data.authentication.repository.AuthenticationRepository
 import javax.inject.Inject
 
 @HiltViewModel
-class SignInViewModel @Inject constructor(private val signInRepository: SignInRepository) :
+class SignInViewModel @Inject constructor(private val signInRepository: AuthenticationRepository) :
     ViewModel() {
     private val _authResult = MutableStateFlow<Response<AuthResult>?>(null)
     val authResult: StateFlow<Response<AuthResult>?> = _authResult.asStateFlow()

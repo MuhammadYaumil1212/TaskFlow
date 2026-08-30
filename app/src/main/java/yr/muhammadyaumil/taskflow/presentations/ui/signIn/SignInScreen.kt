@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import yr.muhammadyaumil.taskflow.R
 import yr.muhammadyaumil.taskflow.core.components.LoadingSpinner
 import yr.muhammadyaumil.taskflow.core.response.Response
-import yr.muhammadyaumil.taskflow.data.signIn.models.AuthResult
+import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
 import yr.muhammadyaumil.taskflow.presentations.components.AppTextField
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.LoginButtonWithSocialMedia
 
@@ -214,7 +214,7 @@ fun DividerOrLoginWith(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.width(5.dp))
         Text(
-            text = "Atau Masuk Dengan", fontSize = 14.sp,
+            text = "Atau Masuk Dengan", fontSize = 12.sp,
             color = MaterialTheme.colorScheme.secondary,
             fontWeight = FontWeight.Bold
         )

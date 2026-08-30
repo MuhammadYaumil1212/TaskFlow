@@ -1,4 +1,4 @@
-package yr.muhammadyaumil.taskflow.data.signIn.models
+package yr.muhammadyaumil.taskflow.data.authentication.models
 
 data class LogoutResult(
     val successLogout: String? = null,

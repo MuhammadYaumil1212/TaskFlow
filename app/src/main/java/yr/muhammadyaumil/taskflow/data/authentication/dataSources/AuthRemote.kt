@@ -1,4 +1,4 @@
-package yr.muhammadyaumil.taskflow.data.signIn.DataSources
+package yr.muhammadyaumil.taskflow.data.authentication.dataSources
 
 import android.content.Context
 import android.content.MutableContextWrapper
@@ -10,11 +10,13 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
-import yr.muhammadyaumil.taskflow.data.signIn.models.AuthResult
-import yr.muhammadyaumil.taskflow.data.signIn.models.LogoutResult
-import yr.muhammadyaumil.taskflow.data.signIn.models.UserData
+import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
+import yr.muhammadyaumil.taskflow.data.authentication.models.LogoutResult
+import yr.muhammadyaumil.taskflow.data.authentication.models.UserData
 import javax.inject.Inject
 
 class AuthRemote @Inject constructor(@ApplicationContext private val context: Context) {
@@ -26,6 +28,8 @@ class AuthRemote @Inject constructor(@ApplicationContext private val context: Co
             .setFilterByAuthorizedAccounts(false)
             .build()
     }
+
+    private val firestoreDb: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
     private val getCredentialRequest: GetCredentialRequest by lazy {
         GetCredentialRequest.Builder()
             .addCredentialOption(getGoogleIdOption)
@@ -66,5 +70,39 @@ class AuthRemote @Inject constructor(@ApplicationContext private val context: Co
         firebaseAuth.signOut()
         credentialManager.clearCredentialState(ClearCredentialStateRequest())
         return LogoutResult(successLogout = "Sucessfully Logout")
+    }
+
+    suspend fun signUpWithEmailAndPassword(
+        email: String,
+        username: String,
+        password: String,
+    ): AuthResult {
+        val authResult = firebaseAuth.createUserWithEmailAndPassword(
+            email,
+            password
+        ).await()
+
+        val user = authResult.user ?: throw Exception("Gagal membuat user, data null")
+
+        user.sendEmailVerification().await()
+
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName(username)
+            .build()
+        user.updateProfile(profileUpdates).await()
+
+        val saveUser = UserData(
+            username = username,
+            email = user.email ?: "",
+            profilePicture = user.photoUrl,
+            confirmationStatus = user.isEmailVerified
+        )
+
+        firestoreDb.collection("users")
+            .document(user.uid)
+            .set(saveUser)
+            .await()
+
+        return AuthResult(successRegistration = true)
     }
 }

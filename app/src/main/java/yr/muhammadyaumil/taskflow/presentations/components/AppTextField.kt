@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +28,8 @@ fun AppTextField(
     text: String,
     hint: String,
     valueText: String,
+    isError: Boolean = false,
+    errorMessage: String? = null,
     onValueChanged: (String) -> Unit,
     isPassword: Boolean = false,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -66,6 +69,10 @@ fun AppTextField(
         placeholder = { Text(text = hint) },
         onValueChange = onValueChanged,
         singleLine = true,
+        isError = isError,
+        supportingText = if (isError && errorMessage != null) {
+            { Text(text = errorMessage, color = MaterialTheme.colorScheme.error) }
+        } else null,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
         leadingIcon = leadingIcon,

@@ -116,6 +116,15 @@ class AuthRemote @Inject constructor(@ApplicationContext private val context: Co
     }
 
     fun isLoggedIn(): Boolean = firebaseAuth.currentUser != null
+    fun getUserDisplayName(): AuthResult {
+        val getUserData = firebaseAuth.currentUser
+        val resultUser = UserData(
+            username = getUserData?.displayName,
+            email = getUserData?.email,
+            profilePicture = getUserData?.photoUrl
+        )
+        return AuthResult(userData = resultUser)
+    }
 
     suspend fun signOut(): LogoutResult {
         firebaseAuth.signOut()

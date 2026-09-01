@@ -22,6 +22,7 @@ interface AuthenticationRepository {
     ): Response<AuthResult>
 
     fun isLoggedIn(): Boolean
+    suspend fun getUserDisplayName(): Response<AuthResult>
     suspend fun logout(): Response<LogoutResult>
 
     //for sign up
@@ -91,6 +92,28 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
     }
 
     override fun isLoggedIn(): Boolean = authRemote.isLoggedIn()
+    override suspend fun getUserDisplayName(): Response<AuthResult> {
+        return try {
+            val getDisplay = authRemote.getUserDisplayName()
+            Response.Success(getDisplay)
+        } catch (e: IOException) {
+            Log.e("NETWORK ERROR ", e.localizedMessage ?: "Something went wrong")
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: SocketTimeoutException) {
+            Log.e("SOCKET ERROR ", e.localizedMessage ?: "Something went wrong")
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: UnknownHostException) {
+            Log.e("CONNECTION ERROR ", e.localizedMessage ?: "Something went wrong")
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: GetCredentialCancellationException) {
+            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "Something went wrong")
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: Exception) {
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        }
+    }
 
     override suspend fun logout(): Response<LogoutResult> {
         return try {

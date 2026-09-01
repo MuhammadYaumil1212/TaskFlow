@@ -26,10 +26,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -51,12 +48,16 @@ import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.LoginButton
 fun SignInScreen(
     modifier: Modifier = Modifier,
     authState: Response<AuthResult>?,
+    usernameText: String,
+    passwordText: String,
+    usernameValueChanged: (String) -> Unit,
+    passwordValueChanged: (String) -> Unit,
     onSignUpClick: () -> Unit,
     onTapGoogleLogin: () -> Unit,
+    onSignInClick: () -> Unit,
     onForgotPassClick: (offset: Offset) -> Unit
 ) {
-    var usernameText by remember { mutableStateOf("") }
-    var passwordText by remember { mutableStateOf("") }
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(authState) {
@@ -83,11 +84,12 @@ fun SignInScreen(
                     HeaderLogo()
                     Spacer(modifier = Modifier.height(20.dp))
                     LoginForm(
+                        authState = authState,
                         usernameText = usernameText,
                         passwordText = passwordText,
-                        onUsernameChanged = { usernameText = it },
-                        onPasswordChanged = { passwordText = it },
-                        onSignInClick = { },
+                        onUsernameChanged = usernameValueChanged,
+                        onPasswordChanged = passwordValueChanged,
+                        onSignInClick = onSignInClick,
                         onSignUpClick = onSignUpClick,
                         onForgotPassClick = onForgotPassClick,
                         onTapFacebookLogin = {},
@@ -131,6 +133,7 @@ fun HeaderLogo(modifier: Modifier = Modifier) {
 
 @Composable
 fun LoginForm(
+    authState: Response<AuthResult>?,
     usernameText: String,
     passwordText: String,
     onUsernameChanged: (String) -> Unit,
@@ -142,11 +145,13 @@ fun LoginForm(
     onTapGoogleLogin: () -> Unit,
     onTapFacebookLogin: () -> Unit
 ) {
+    val isFormError = authState is Response.Error
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.End) {
         AppTextField(
             modifier = Modifier,
             text = "Username",
             hint = "Masukkan Username",
+            isError = isFormError && usernameText.isBlank(),
             valueText = usernameText,
             onValueChanged = onUsernameChanged
         )
@@ -156,8 +161,9 @@ fun LoginForm(
         AppTextField(
             modifier = Modifier,
             text = "Password",
-            "Masukkan Password Anda",
+            hint = "Masukkan Password Anda",
             isPassword = true,
+            isError = isFormError && usernameText.isBlank(),
             valueText = passwordText,
             onValueChanged = onPasswordChanged
         )

@@ -33,6 +33,24 @@ class SignInViewModel @Inject constructor(private val signInRepository: Authenti
         }
     }
 
+    fun signInWithUsernameAndPassword(
+        username: String,
+        password: String
+    ) {
+        if (username.isBlank() || password.isBlank()) {
+            _authResult.value = Response.Error("Semua kolom harus diisi lengkap.")
+            return
+        }
+        viewModelScope.launch {
+            _authResult.value = Response.Loading
+            val signInWithUsername = signInRepository.signInWithUsernameAndPassword(
+                username = username,
+                password = password
+            )
+            _authResult.value = signInWithUsername
+        }
+    }
+
     private fun isLoggedIn() {
         _isSessionActive.value = signInRepository.isLoggedIn()
     }

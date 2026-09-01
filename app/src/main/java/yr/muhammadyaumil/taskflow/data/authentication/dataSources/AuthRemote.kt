@@ -37,30 +37,81 @@ class AuthRemote @Inject constructor(@ApplicationContext private val context: Co
     }
 
     suspend fun signInWithGoogle(): AuthResult {
-        val contextWrapper = MutableContextWrapper(context)
-        val credential =
-            credentialManager.getCredential(
-                contextWrapper,
-                getCredentialRequest
-            ).credential
+        val mutableWrapper = MutableContextWrapper(context)
 
-        if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-            val idToken = googleIdTokenCredential.idToken // jwt token
-            val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+        val credential = credentialManager.getCredential(
+            context = mutableWrapper,
+            request = getCredentialRequest
+        ).credential
 
-            firebaseAuth.signInWithCredential(firebaseCredential).await()
-            googleIdTokenCredential.apply {
-                val userData = UserData(
-                    username = displayName,
-                    email = email,
-                    profilePicture = profilePictureUri
-                )
-                val authResult = AuthResult(userData = userData)
-                return authResult
-            }
+        if (credential !is CustomCredential || credential.type != GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+            throw Exception("Kredensial Google tidak valid")
+        }
+
+        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+        val firebaseCredential =
+            GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
+
+        val authResult = firebaseAuth.signInWithCredential(firebaseCredential).await()
+        val user = authResult.user ?: throw Exception("Gagal sinkronisasi dengan Firebase")
+        val isNewUser = authResult.additionalUserInfo?.isNewUser == true
+
+        val userData = UserData(
+            username = googleIdTokenCredential.displayName ?: "User",
+            email = googleIdTokenCredential.id,
+            profilePicture = googleIdTokenCredential.profilePictureUri,
+            confirmationStatus = true
+        )
+
+        if (isNewUser) {
+            firestoreDb.collection("users")
+                .document(user.uid)
+                .set(userData)
+                .await()
         } else {
-            return AuthResult(errorMessage = "Invalid credential")
+            firestoreDb.collection("users")
+                .document(user.uid)
+                .update("confirmationStatus", true)
+                .await()
+        }
+
+        return AuthResult(userData = userData)
+    }
+
+    suspend fun signInWithUsernameAndPassword(username: String, password: String): AuthResult {
+        val querySnapshot = firestoreDb.collection("users")
+            .whereEqualTo("username", username)
+            .limit(1)
+            .get()
+            .await()
+
+        if (querySnapshot.isEmpty) {
+            return AuthResult(errorMessage = "Username tidak ditemukan")
+        }
+
+        val userDocument = querySnapshot.documents.first()
+        val email = userDocument.getString("email") ?: ""
+
+        if (email.isEmpty()) {
+            return AuthResult(errorMessage = "Data email tidak valid")
+        }
+
+        val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+        val user = authResult.user
+            ?: return AuthResult(errorMessage = "User tidak ditemukan di autentikasi")
+
+        user.reload().await()
+
+        return if (user.isEmailVerified) {
+            firestoreDb.collection("users")
+                .document(user.uid)
+                .update("confirmationStatus", true)
+                .await()
+
+            AuthResult(successLogin = true)
+        } else {
+            firebaseAuth.signOut()
+            AuthResult(errorMessage = "Email belum di konfirmasi. Silakan cek kotak masuk Anda.")
         }
     }
 

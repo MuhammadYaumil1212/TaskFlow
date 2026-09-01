@@ -2,6 +2,7 @@ package yr.muhammadyaumil.taskflow.data.authentication.repository
 
 import android.util.Log
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.authentication.dataSources.AuthRemote
@@ -15,6 +16,10 @@ import javax.inject.Inject
 interface AuthenticationRepository {
     // for sign in
     suspend fun signInWithGoogle(): Response<AuthResult>
+    suspend fun signInWithUsernameAndPassword(
+        username: String,
+        password: String
+    ): Response<AuthResult>
 
     fun isLoggedIn(): Boolean
     suspend fun logout(): Response<LogoutResult>
@@ -25,6 +30,7 @@ interface AuthenticationRepository {
         username: String,
         password: String,
     ): Response<AuthResult>
+
 }
 
 class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: AuthRemote) :
@@ -47,6 +53,39 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
             Response.Error(e.localizedMessage ?: "Something went wrong")
         } catch (e: GetCredentialCancellationException) {
             Log.e("CANCELLATION ERROR", e.localizedMessage ?: "Something went wrong")
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        }
+    }
+
+    override suspend fun signInWithUsernameAndPassword(
+        username: String,
+        password: String
+    ): Response<AuthResult> {
+        return try {
+            val result = authRemote.signInWithUsernameAndPassword(username, password)
+            if (!result.errorMessage.isNullOrEmpty()) {
+                Response.Error(result.errorMessage)
+            } else {
+                Response.Success(result)
+            }
+        } catch (e: IOException) {
+            Log.e("NETWORK ERROR ", e.localizedMessage ?: "Something went wrong")
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: SocketTimeoutException) {
+            Log.e("SOCKET ERROR ", e.localizedMessage ?: "Something went wrong")
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: UnknownHostException) {
+            Log.e("CONNECTION ERROR ", e.localizedMessage ?: "Something went wrong")
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: GetCredentialCancellationException) {
+            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "Something went wrong")
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: FirebaseAuthUserCollisionException) {
+            Log.e("ERROR COLLISION USER", e.localizedMessage ?: "Something went wrong")
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Response.Error(e.localizedMessage ?: "Something went wrong")
+        } catch (e: Exception) {
             Response.Error(e.localizedMessage ?: "Something went wrong")
         }
     }

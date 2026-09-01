@@ -38,10 +38,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import yr.muhammadyaumil.taskflow.R
-import yr.muhammadyaumil.taskflow.core.components.LoadingSpinner
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
 import yr.muhammadyaumil.taskflow.presentations.components.AppTextField
+import yr.muhammadyaumil.taskflow.presentations.components.LoadingSpinner
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.LoginButtonWithSocialMedia
 
 @Composable

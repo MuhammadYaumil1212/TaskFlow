@@ -14,9 +14,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import yr.muhammadyaumil.taskflow.core.components.LoadingSpinner
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.authentication.models.LogoutResult
+import yr.muhammadyaumil.taskflow.presentations.components.LoadingSpinner
 
 @Composable
 fun TrackerScreen(

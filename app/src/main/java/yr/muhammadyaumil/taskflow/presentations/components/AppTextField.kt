@@ -25,9 +25,11 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AppTextField(
     modifier: Modifier = Modifier,
-    text: String,
     hint: String,
     valueText: String,
+    minLines: Int = 1,
+    maxLines: Int = 1,
+    singleLine: Boolean = true,
     isError: Boolean = false,
     errorMessage: String? = null,
     onValueChanged: (String) -> Unit,
@@ -67,8 +69,10 @@ fun AppTextField(
         value = valueText,
         shape = RoundedCornerShape(16.dp),
         placeholder = { Text(text = hint) },
+        minLines = minLines,
+        maxLines = maxLines,
         onValueChange = onValueChanged,
-        singleLine = true,
+        singleLine = singleLine,
         isError = isError,
         supportingText = if (isError && errorMessage != null) {
             { Text(text = errorMessage, color = MaterialTheme.colorScheme.error) }

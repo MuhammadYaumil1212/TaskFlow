@@ -34,8 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import yr.muhammadyaumil.taskflow.R
-import yr.muhammadyaumil.taskflow.core.response.Response
-import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
 import yr.muhammadyaumil.taskflow.presentations.components.AppTextField
 import yr.muhammadyaumil.taskflow.presentations.components.LoadingSpinner
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.components.LoginButtonWithSocialMedia
@@ -47,20 +45,25 @@ fun SignUpScreen(
     emailText: String,
     passwordText: String,
     confirmPasswordText: String,
+    isLoading: Boolean,
+    errorMessage: String?,
+    isUsernameError: Boolean,
+    isEmailError: Boolean,
+    isPasswordError: Boolean,
+    isConfirmPasswordError: Boolean,
     emailValueChanged: (String) -> Unit,
     usernameValueChanged: (String) -> Unit,
     passwordValueChanged: (String) -> Unit,
     confirmPasswordValueChanged: (String) -> Unit,
     onTapSignUp: () -> Unit,
-    onClearError: () -> Unit,
-    authState: Response<AuthResult>?
+    onClearError: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(authState) {
-        if (authState is Response.Error) {
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
             snackbarHostState.showSnackbar(
-                message = authState.message,
+                message = message,
                 duration = SnackbarDuration.Short
             )
             onClearError()
@@ -76,38 +79,37 @@ fun SignUpScreen(
                 .padding(paddingValues)
                 .systemBarsPadding()
         ) {
-            Scaffold(modifier = modifier) { innerPadding ->
-                Box(modifier = Modifier.padding(innerPadding)) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 18.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        item {
-                            HeaderLogo()
-                            Spacer(modifier = Modifier.height(20.dp))
-                            RegisterForm(
-                                authState = authState,
-                                usernameText = usernameText,
-                                passwordText = passwordText,
-                                emailText = emailText,
-                                confirmPasswordText = confirmPasswordText,
-                                emailValueChanged = emailValueChanged,
-                                usernameValueChanged = usernameValueChanged,
-                                passwordValueChanged = passwordValueChanged,
-                                confirmPasswordValueChanged = confirmPasswordValueChanged,
-                                oneTapGoogleLogin = {},
-                                oneTapFacebookLogin = {},
-                                onSignUpClick = onTapSignUp,
-                            )
-                        }
-                    }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 18.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    HeaderLogo()
+                    Spacer(modifier = Modifier.height(20.dp))
+                    RegisterForm(
+                        usernameText = usernameText,
+                        passwordText = passwordText,
+                        emailText = emailText,
+                        confirmPasswordText = confirmPasswordText,
+                        isUsernameError = isUsernameError,
+                        isEmailError = isEmailError,
+                        isPasswordError = isPasswordError,
+                        isConfirmPasswordError = isConfirmPasswordError,
+                        emailValueChanged = emailValueChanged,
+                        usernameValueChanged = usernameValueChanged,
+                        passwordValueChanged = passwordValueChanged,
+                        confirmPasswordValueChanged = confirmPasswordValueChanged,
+                        oneTapGoogleLogin = {},
+                        oneTapFacebookLogin = {},
+                        onSignUpClick = onTapSignUp,
+                    )
                 }
-                if (authState is Response.Loading) {
-                    LoadingSpinner()
-                }
+            }
+            if (isLoading) {
+                LoadingSpinner()
             }
         }
     }
@@ -141,12 +143,15 @@ fun HeaderLogo(modifier: Modifier = Modifier) {
 
 @Composable
 fun RegisterForm(
-    authState: Response<AuthResult>?,
     modifier: Modifier = Modifier,
     usernameText: String,
     emailText: String,
     passwordText: String,
     confirmPasswordText: String,
+    isUsernameError: Boolean,
+    isEmailError: Boolean,
+    isPasswordError: Boolean,
+    isConfirmPasswordError: Boolean,
     emailValueChanged: (String) -> Unit,
     usernameValueChanged: (String) -> Unit,
     passwordValueChanged: (String) -> Unit,
@@ -155,51 +160,41 @@ fun RegisterForm(
     oneTapFacebookLogin: () -> Unit,
     onSignUpClick: () -> Unit
 ) {
-    val isFormError = authState is Response.Error
-
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppTextField(
-            modifier = Modifier,
-            text = "Email",
+            modifier = Modifier.fillMaxWidth(),
             hint = "Masukkan Email",
             valueText = emailText,
-            isError = isFormError && emailText.isBlank(),
+            isError = isEmailError,
             onValueChanged = emailValueChanged
         )
         Spacer(modifier = Modifier.height(15.dp))
         AppTextField(
-            modifier = Modifier,
-            text = "Username",
+            modifier = Modifier.fillMaxWidth(),
             hint = "Masukkan Username",
-            isError = isFormError && usernameText.isBlank(),
+            isError = isUsernameError,
             valueText = usernameText,
             onValueChanged = usernameValueChanged
         )
         Spacer(modifier = Modifier.height(15.dp))
         AppTextField(
-            modifier = Modifier,
-            text = "Password",
-            "Masukkan Password Anda",
+            modifier = Modifier.fillMaxWidth(),
+            hint = "Masukkan Password Anda",
             isPassword = true,
             valueText = passwordText,
-            isError = isFormError && passwordText.isBlank(),
+            isError = isPasswordError,
             onValueChanged = passwordValueChanged
         )
         Spacer(modifier = Modifier.height(15.dp))
         AppTextField(
-            modifier = Modifier,
-            text = "Konfirmasi Password",
+            modifier = Modifier.fillMaxWidth(),
             hint = "Konfirmasi Password Anda",
             isPassword = true,
             valueText = confirmPasswordText,
-            isError = isFormError && (
-                    confirmPasswordText.isBlank()
-                            || passwordText
-                            != confirmPasswordText
-                    ),
+            isError = isConfirmPasswordError,
             onValueChanged = confirmPasswordValueChanged
         )
     }
@@ -208,15 +203,11 @@ fun RegisterForm(
         onClick = onSignUpClick,
         shape = RoundedCornerShape(size = 10.dp),
         colors = ButtonDefaults.buttonColors(
-            MaterialTheme
-                .colorScheme
-                .primary
+            MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text(
-            stringResource(R.string.sign_up_btn_text)
-        )
+        Text(stringResource(R.string.sign_up_btn_text))
     }
     Spacer(modifier = Modifier.height(20.dp))
     DividerOrRegisterWith()

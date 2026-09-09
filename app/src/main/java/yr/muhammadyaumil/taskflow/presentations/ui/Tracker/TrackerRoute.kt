@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 import yr.muhammadyaumil.taskflow.core.response.Response
+import yr.muhammadyaumil.taskflow.presentations.ui.profile.ProfileRoute
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.SignInRoute
 
 @Serializable
@@ -19,6 +20,7 @@ fun EntryProviderScope<NavKey>.trackerRoute(backStack: NavBackStack<NavKey>) {
     entry<TrackerRoute> {
         val viewModel: TrackerViewModel = hiltViewModel()
         val logoutResult by viewModel.logoutResult.collectAsStateWithLifecycle()
+        val authResult by viewModel.getUserData.collectAsStateWithLifecycle()
 
         LaunchedEffect(logoutResult) {
             if (logoutResult is Response.Success) {
@@ -28,10 +30,8 @@ fun EntryProviderScope<NavKey>.trackerRoute(backStack: NavBackStack<NavKey>) {
         }
 
         TrackerScreen(
-            authState = logoutResult,
-            onLogout = {
-                viewModel.logout()
-            }
+            authState = authResult,
+            goToProfile = { backStack.add(ProfileRoute) }
         )
     }
 }

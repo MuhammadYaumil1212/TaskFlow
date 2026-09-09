@@ -6,52 +6,96 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yr.muhammadyaumil.taskflow.core.response.Response
-import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
 import yr.muhammadyaumil.taskflow.data.authentication.repository.AuthenticationRepository
 import javax.inject.Inject
 
 @HiltViewModel
-class SignInViewModel @Inject constructor(private val signInRepository: AuthenticationRepository) :
-    ViewModel() {
-    private val _authResult = MutableStateFlow<Response<AuthResult>?>(null)
-    val authResult: StateFlow<Response<AuthResult>?> = _authResult.asStateFlow()
+class SignInViewModel @Inject constructor(
+    private val signInRepository: AuthenticationRepository
+) : ViewModel() {
 
-    private val _isSessionActive = MutableStateFlow<Boolean>(false)
+    private val _uiState = MutableStateFlow(SignInUiState())
+    val uiState: StateFlow<SignInUiState> = _uiState.asStateFlow()
+
+    private val _isSessionActive = MutableStateFlow(false)
     val isSessionActive: StateFlow<Boolean> = _isSessionActive.asStateFlow()
 
     init {
-        isLoggedIn()
+        checkSession()
+    }
+
+    fun onUsernameChange(username: String) = _uiState.update {
+        it.copy(usernameValue = username, isUsernameError = false)
+    }
+
+    fun onPasswordChange(password: String) = _uiState.update {
+        it.copy(passwordValue = password, isPasswordError = false)
+    }
+
+    fun resetMessage() = _uiState.update { it.copy(errorMessage = null) }
+
+    fun resetSuccessState() = _uiState.update { it.copy(isSignInSuccessful = false) }
+
+    private fun checkSession() {
+        _isSessionActive.value = signInRepository.isLoggedIn()
     }
 
     fun signInWithGoogle() {
         viewModelScope.launch {
-            _authResult.value = Response.Loading
-            val login = signInRepository.signInWithGoogle()
-            _authResult.value = login
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            when (val result = signInRepository.signInWithGoogle()) {
+                is Response.Success -> {
+                    _uiState.update { it.copy(isLoading = false, isSignInSuccessful = true) }
+                }
+
+                is Response.Error -> {
+                    _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }
+                }
+
+                is Response.Loading -> {
+                    _uiState.update { it.copy(isLoading = true) }
+                }
+            }
         }
     }
 
-    fun signInWithUsernameAndPassword(
-        username: String,
-        password: String
-    ) {
-        if (username.isBlank() || password.isBlank()) {
-            _authResult.value = Response.Error("Semua kolom harus diisi lengkap.")
+    fun signInWithUsernameAndPassword() {
+        val currentState = _uiState.value
+
+        if (currentState.usernameValue.isBlank() || currentState.passwordValue.isBlank()) {
+            _uiState.update {
+                it.copy(
+                    isUsernameError = currentState.usernameValue.isBlank(),
+                    isPasswordError = currentState.passwordValue.isBlank(),
+                    errorMessage = "Username dan password tidak boleh kosong"
+                )
+            }
             return
         }
-        viewModelScope.launch {
-            _authResult.value = Response.Loading
-            val signInWithUsername = signInRepository.signInWithUsernameAndPassword(
-                username = username,
-                password = password
-            )
-            _authResult.value = signInWithUsername
-        }
-    }
 
-    private fun isLoggedIn() {
-        _isSessionActive.value = signInRepository.isLoggedIn()
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            when (val result = signInRepository.signInWithUsernameAndPassword(
+                username = currentState.usernameValue,
+                password = currentState.passwordValue
+            )) {
+                is Response.Success -> {
+                    _uiState.update { it.copy(isLoading = false, isSignInSuccessful = true) }
+                }
+
+                is Response.Error -> {
+                    _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }
+                }
+
+                is Response.Loading -> {
+                    _uiState.update { it.copy(isLoading = true) }
+                }
+            }
+        }
     }
 }

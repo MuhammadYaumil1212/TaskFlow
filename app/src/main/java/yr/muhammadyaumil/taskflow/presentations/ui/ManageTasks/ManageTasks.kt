@@ -1,4 +1,4 @@
-package yr.muhammadyaumil.taskflow.presentations.ui.profile
+package yr.muhammadyaumil.taskflow.presentations.ui.ManageTasks
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,11 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier) {
+fun ManageTasks(modifier: Modifier = Modifier) {
     Scaffold { innerPadding ->
         LazyColumn(modifier = modifier.padding(innerPadding)) {
             item {
-                Text("Profile Page")
+                Text("Tasks Manage")
             }
         }
     }

@@ -99,10 +99,18 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 
+    //compose animation
+    implementation(libs.androidx.compose.animation)
+
     //coil compose
     implementation(libs.coil.compose)
 
     //managing system bar
     implementation(libs.accompanist.systemuicontroller)
 
+    // retrofit, OkHttp and gson converter
+    implementation(libs.retrofit)
+    implementation(libs.logging.interceptor)
+    implementation(libs.converter.gson)
+    
 }

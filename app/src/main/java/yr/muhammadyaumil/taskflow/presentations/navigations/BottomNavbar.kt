@@ -4,17 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,8 +30,8 @@ fun BottomNavBar(
 ) {
     Surface(
         modifier = modifier
-            .padding(horizontal = 24.dp, vertical = 24.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(start = 24.dp, end = 24.dp, bottom = 12.dp, top = 8.dp),
         shape = RoundedCornerShape(32.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         shadowElevation = 8.dp
@@ -54,30 +51,30 @@ fun BottomNavBar(
 
                 Box(
                     modifier = Modifier
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(10.dp))
                         .background(background)
-                        .clickable { onItemClick(item.route) }
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .clickable {
+                            onItemClick(item.route)
+                        }
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
                             imageVector = item.icon,
                             contentDescription = item.title,
                             tint = contentColor
                         )
-
-                        if (isSelected) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = item.title,
-                                color = contentColor,
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
+//                        if (isSelected) {
+//                            Spacer(modifier = Modifier.width(8.dp))
+//                            Text(
+//                                text = item.title,
+//                                color = contentColor,
+//                                style = MaterialTheme.typography.labelMedium
+//                            )
+//                        }
                     }
                 }
             }

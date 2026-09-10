@@ -3,7 +3,6 @@ package yr.muhammadyaumil.taskflow.data.authentication.repository
 import android.util.Log
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.authentication.dataSources.AuthRemote
 import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
@@ -40,21 +39,24 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
         return try {
             val dataResult = authRemote.signInWithGoogle()
             return Response.Success(dataResult)
-        } catch (e: Exception) {
-            Log.e("ERROR SIGN IN", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
-        } catch (e: IOException) {
-            Log.e("NETWORK ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
         } catch (e: SocketTimeoutException) {
-            Log.e("SOCKET ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
+            Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
         } catch (e: UnknownHostException) {
-            Log.e("CONNECTION ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("CONNECTION ERROR", e.localizedMessage ?: "No Internet")
+            Response.Error("Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.")
+        } catch (e: IOException) {
+            Log.e("NETWORK ERROR", e.localizedMessage ?: "Network Issue")
+            Response.Error("Terjadi gangguan jaringan. Pastikan koneksi internet stabil.")
         } catch (e: GetCredentialCancellationException) {
-            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "User Cancelled")
+            Response.Error("Proses login dibatalkan.")
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Log.e("AUTH ERROR", e.localizedMessage ?: "Invalid Credentials")
+            Response.Error("Email atau password yang dimasukkan salah.")
+        } catch (e: Exception) {
+            Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
+            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
         }
     }
 
@@ -69,25 +71,24 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
             } else {
                 Response.Success(result)
             }
-        } catch (e: IOException) {
-            Log.e("NETWORK ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
         } catch (e: SocketTimeoutException) {
-            Log.e("SOCKET ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
+            Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
         } catch (e: UnknownHostException) {
-            Log.e("CONNECTION ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("CONNECTION ERROR", e.localizedMessage ?: "No Internet")
+            Response.Error("Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.")
+        } catch (e: IOException) {
+            Log.e("NETWORK ERROR", e.localizedMessage ?: "Network Issue")
+            Response.Error("Terjadi gangguan jaringan. Pastikan koneksi internet stabil.")
         } catch (e: GetCredentialCancellationException) {
-            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
-        } catch (e: FirebaseAuthUserCollisionException) {
-            Log.e("ERROR COLLISION USER", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "User Cancelled")
+            Response.Error("Proses login dibatalkan.")
         } catch (e: FirebaseAuthInvalidCredentialsException) {
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("AUTH ERROR", e.localizedMessage ?: "Invalid Credentials")
+            Response.Error("Email atau password yang dimasukkan salah.")
         } catch (e: Exception) {
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
+            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
         }
     }
 
@@ -96,22 +97,24 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
         return try {
             val getDisplay = authRemote.getUserDisplayName()
             Response.Success(getDisplay)
-        } catch (e: IOException) {
-            Log.e("NETWORK ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
         } catch (e: SocketTimeoutException) {
-            Log.e("SOCKET ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
+            Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
         } catch (e: UnknownHostException) {
-            Log.e("CONNECTION ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("CONNECTION ERROR", e.localizedMessage ?: "No Internet")
+            Response.Error("Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.")
+        } catch (e: IOException) {
+            Log.e("NETWORK ERROR", e.localizedMessage ?: "Network Issue")
+            Response.Error("Terjadi gangguan jaringan. Pastikan koneksi internet stabil.")
         } catch (e: GetCredentialCancellationException) {
-            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "User Cancelled")
+            Response.Error("Proses login dibatalkan.")
         } catch (e: FirebaseAuthInvalidCredentialsException) {
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("AUTH ERROR", e.localizedMessage ?: "Invalid Credentials")
+            Response.Error("Email atau password yang dimasukkan salah.")
         } catch (e: Exception) {
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
+            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
         }
     }
 
@@ -119,18 +122,24 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
         return try {
             val logoutResult = authRemote.signOut()
             return Response.Success(logoutResult)
-        } catch (e: Exception) {
-            Log.e("ERROR SIGN IN", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
-        } catch (e: IOException) {
-            Log.e("NETWORK ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
         } catch (e: SocketTimeoutException) {
-            Log.e("SOCKET ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
+            Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
         } catch (e: UnknownHostException) {
-            Log.e("CONNECTION ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("CONNECTION ERROR", e.localizedMessage ?: "No Internet")
+            Response.Error("Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.")
+        } catch (e: IOException) {
+            Log.e("NETWORK ERROR", e.localizedMessage ?: "Network Issue")
+            Response.Error("Terjadi gangguan jaringan. Pastikan koneksi internet stabil.")
+        } catch (e: GetCredentialCancellationException) {
+            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "User Cancelled")
+            Response.Error("Proses login dibatalkan.")
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Log.e("AUTH ERROR", e.localizedMessage ?: "Invalid Credentials")
+            Response.Error("Email atau password yang dimasukkan salah.")
+        } catch (e: Exception) {
+            Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
+            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
         }
     }
 
@@ -146,24 +155,24 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
                 password = password,
             )
             Response.Success(regisUser)
-        } catch (e: Exception) {
-            Log.e("ERROR SIGN IN", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
-        } catch (e: IOException) {
-            Log.e("NETWORK ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
         } catch (e: SocketTimeoutException) {
-            Log.e("SOCKET ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
+            Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
         } catch (e: UnknownHostException) {
-            Log.e("CONNECTION ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("CONNECTION ERROR", e.localizedMessage ?: "No Internet")
+            Response.Error("Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.")
+        } catch (e: IOException) {
+            Log.e("NETWORK ERROR", e.localizedMessage ?: "Network Issue")
+            Response.Error("Terjadi gangguan jaringan. Pastikan koneksi internet stabil.")
         } catch (e: GetCredentialCancellationException) {
-            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
-        } catch (e: FirebaseAuthUserCollisionException) {
-            Log.e("ERROR COLLISION USER", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "User Cancelled")
+            Response.Error("Proses login dibatalkan.")
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Log.e("AUTH ERROR", e.localizedMessage ?: "Invalid Credentials")
+            Response.Error("Email atau password yang dimasukkan salah.")
+        } catch (e: Exception) {
+            Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
+            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
         }
     }
 }

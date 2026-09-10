@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yr.muhammadyaumil.taskflow.core.response.Response
-import yr.muhammadyaumil.taskflow.data.addTracker.repository.HabitRepository
+import yr.muhammadyaumil.taskflow.data.ManageHabits.repository.HabitRepository
 import javax.inject.Inject
 
 @HiltViewModel

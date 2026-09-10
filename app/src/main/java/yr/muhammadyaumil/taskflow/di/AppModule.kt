@@ -8,10 +8,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import yr.muhammadyaumil.taskflow.data.addTracker.dataSources.HabitRemoteDataSource
-import yr.muhammadyaumil.taskflow.data.addTracker.dataSources.HabitRemoteDataSourceImpl
-import yr.muhammadyaumil.taskflow.data.addTracker.repository.HabitRepository
-import yr.muhammadyaumil.taskflow.data.addTracker.repository.HabitRepositoryImpl
+import yr.muhammadyaumil.taskflow.data.ManageHabits.dataSources.HabitRemoteDataSource
+import yr.muhammadyaumil.taskflow.data.ManageHabits.dataSources.HabitRemoteDataSourceImpl
+import yr.muhammadyaumil.taskflow.data.ManageHabits.repository.HabitRepository
+import yr.muhammadyaumil.taskflow.data.ManageHabits.repository.HabitRepositoryImpl
 import yr.muhammadyaumil.taskflow.data.authentication.dataSources.AuthRemote
 import yr.muhammadyaumil.taskflow.data.authentication.dataSources.AuthRemoteImpl
 import yr.muhammadyaumil.taskflow.data.authentication.repository.AuthenticationRepository

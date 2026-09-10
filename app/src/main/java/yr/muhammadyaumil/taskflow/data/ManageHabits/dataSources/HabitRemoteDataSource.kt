@@ -1,11 +1,11 @@
-package yr.muhammadyaumil.taskflow.data.addTracker.dataSources
+package yr.muhammadyaumil.taskflow.data.ManageHabits.dataSources
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
 import yr.muhammadyaumil.taskflow.core.response.Response
-import yr.muhammadyaumil.taskflow.data.addTracker.models.HabitDto
+import yr.muhammadyaumil.taskflow.data.ManageHabits.models.HabitDto
 
 
 interface HabitRemoteDataSource {

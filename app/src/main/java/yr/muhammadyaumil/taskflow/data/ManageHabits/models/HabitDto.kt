@@ -1,4 +1,4 @@
-package yr.muhammadyaumil.taskflow.data.addTracker.models
+package yr.muhammadyaumil.taskflow.data.ManageHabits.models
 
 data class HabitDto(
     val id: String = "",

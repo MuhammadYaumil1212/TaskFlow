@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yr.muhammadyaumil.taskflow.core.response.Response
+import yr.muhammadyaumil.taskflow.data.ManageHabits.models.HabitDto
 import yr.muhammadyaumil.taskflow.data.ManageHabits.repository.HabitRepository
 import javax.inject.Inject
 
@@ -40,6 +41,9 @@ class AddTrackerViewModel @Inject constructor(
     fun onShowDurationPickerChange(show: Boolean) =
         _uiState.update { it.copy(showDurationPicker = show) }
 
+    fun onHabitDateChange(date: Long) = _uiState.update { it.copy(habitDate = date) }
+    fun onShowDatePickerChange(show: Boolean) = _uiState.update { it.copy(showDatePicker = show) }
+
     fun saveHabit() {
         val currentState = _uiState.value
 
@@ -65,19 +69,16 @@ class AddTrackerViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            val result = habitRepository.createNewHabit(
+            val newHabit = HabitDto(
                 name = currentState.habitName,
                 notes = currentState.habitNotes,
-                isDurationEnabled = currentState.isDurationEnabled,
+                date = currentState.habitDate,
                 duration = currentState.activityDuration,
                 frequency = currentState.frequency,
                 reminder = currentState.reminder,
-                isAttachmentEnabled = currentState.isAttachmentEnabled,
                 categoryHex = currentState.selectedCategoryHex
             )
-
-            when (result) {
+            when (val result = habitRepository.createNewHabit(newHabit)) {
                 is Response.Success -> {
                     _uiState.update {
                         it.copy(isLoading = false, isSavedSuccess = true)

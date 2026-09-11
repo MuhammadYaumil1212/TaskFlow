@@ -16,9 +16,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -27,6 +33,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +42,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -50,7 +58,9 @@ import yr.muhammadyaumil.taskflow.presentations.ui.AddTracker.Components.Duratio
 import yr.muhammadyaumil.taskflow.presentations.ui.AddTracker.Components.FrequencyAndReminder
 import yr.muhammadyaumil.taskflow.presentations.ui.AddTracker.Components.Header
 import yr.muhammadyaumil.taskflow.presentations.ui.AddTracker.Components.TitleAndNotes
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +71,7 @@ fun AddTrackerScreen(
     habitName: String,
     habitNotes: String,
     isDurationEnabled: Boolean,
+    habitDate: Long,
     activityDuration: String,
     isAttachmentEnabled: Boolean,
     frequency: String,
@@ -69,6 +80,7 @@ fun AddTrackerScreen(
     isHabitNotesError: Boolean,
     errorMessage: String?,
     onClearError: () -> Unit,
+    showDatePicker: Boolean,
     selectedCategoryHex: String,
     frequencyExpanded: Boolean,
     showTimePicker: Boolean,
@@ -76,6 +88,7 @@ fun AddTrackerScreen(
     onBack: () -> Unit,
     onSave: () -> Unit,
     onHabitNameChange: (String) -> Unit,
+    onHabitDateChange: (Long) -> Unit,
     onHabitNotesChange: (String) -> Unit,
     onDurationEnabledChange: (Boolean) -> Unit,
     onActivityDurationChange: (String) -> Unit,
@@ -86,6 +99,7 @@ fun AddTrackerScreen(
     onFrequencyExpandedChange: (Boolean) -> Unit,
     onShowTimePickerChange: (Boolean) -> Unit,
     onShowDurationPickerChange: (Boolean) -> Unit,
+    onShowDatePickerChange: (Boolean) -> Unit,
 ) {
     val categories = remember {
         mutableStateListOf(
@@ -105,6 +119,8 @@ fun AddTrackerScreen(
         initialMinute = calendar.get(Calendar.MINUTE),
         is24Hour = true
     )
+    val dateFormatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
+    val dateString = remember(habitDate) { dateFormatter.format(Date(habitDate)) }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -143,7 +159,38 @@ fun AddTrackerScreen(
                     isHabitNotesError = isHabitNotesError
                 )
             }
-
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Tanggal Mulai",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .clickable { onShowDatePickerChange(true) }
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = dateString, color = MaterialTheme.colorScheme.onSurface)
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Pilih Tanggal",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
             item {
                 DurationTarget(
                     isDurationEnabled = isDurationEnabled,
@@ -185,9 +232,33 @@ fun AddTrackerScreen(
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
+
     if (isLoading) {
         LoadingSpinner()
     }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = habitDate)
+        DatePickerDialog(
+            onDismissRequest = { onShowDatePickerChange(false) },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { onHabitDateChange(it) }
+                    onShowDatePickerChange(false)
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onShowDatePickerChange(false) }) {
+                    Text("Batal")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     if (showAddCategoryDialog) {
         val allColors = listOf(
             "#9DB499", "#E8C7AC", "#B5D2E8", "#D9C6E8",

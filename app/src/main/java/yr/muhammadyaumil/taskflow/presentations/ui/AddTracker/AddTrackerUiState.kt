@@ -7,10 +7,12 @@ import java.util.Locale
 data class AddTrackerUiState(
     val habitName: String = "",
     val habitNotes: String = "",
+    val habitDate: Long = System.currentTimeMillis(),
     val isHabitNameError: Boolean = false,
     val isHabitNotesError: Boolean = false,
     val isDurationEnabled: Boolean = false,
     val activityDuration: String = "Tidak ada",
+    val showDatePicker: Boolean = false,
     val frequency: String = "Setiap Hari",
     val reminder: String = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),
     val isAttachmentEnabled: Boolean = false,

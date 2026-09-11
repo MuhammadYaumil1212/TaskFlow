@@ -8,5 +8,6 @@ data class HabitDto(
     val frequency: String = "",
     val reminder: String = "",
     val categoryHex: String = "",
+    val date: Long = 0L,
     val createdAt: Long = System.currentTimeMillis()
 )

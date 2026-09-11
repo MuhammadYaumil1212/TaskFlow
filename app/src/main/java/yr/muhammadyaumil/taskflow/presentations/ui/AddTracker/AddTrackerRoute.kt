@@ -29,6 +29,7 @@ fun EntryProviderScope<NavKey>.addTrackerRoute(backStackEntry: NavBackStack<NavK
         AddTrackerScreen(
             habitName = uiState.habitName,
             habitNotes = uiState.habitNotes,
+            habitDate = uiState.habitDate,
             isHabitNameError = uiState.isHabitNameError,
             isHabitNotesError = uiState.isHabitNotesError,
             isLoading = uiState.isLoading,
@@ -42,6 +43,7 @@ fun EntryProviderScope<NavKey>.addTrackerRoute(backStackEntry: NavBackStack<NavK
             frequencyExpanded = uiState.frequencyExpanded,
             showTimePicker = uiState.showTimePicker,
             showDurationPicker = uiState.showDurationPicker,
+            showDatePicker = uiState.showDatePicker,
             onBack = {
                 backStackEntry.clear()
                 backStackEntry.add(TrackerRoute)
@@ -49,6 +51,7 @@ fun EntryProviderScope<NavKey>.addTrackerRoute(backStackEntry: NavBackStack<NavK
             onSave = viewModel::saveHabit,
             onHabitNameChange = viewModel::onHabitNameChange,
             onHabitNotesChange = viewModel::onHabitNotesChange,
+            onHabitDateChange = viewModel::onHabitDateChange,
             onDurationEnabledChange = viewModel::onDurationEnabledChange,
             onActivityDurationChange = viewModel::onActivityDurationChange,
             onAttachmentEnabledChange = viewModel::onAttachmentEnabledChange,
@@ -59,6 +62,7 @@ fun EntryProviderScope<NavKey>.addTrackerRoute(backStackEntry: NavBackStack<NavK
             onFrequencyExpandedChange = viewModel::onFrequencyExpandedChange,
             onShowTimePickerChange = viewModel::onShowTimePickerChange,
             onShowDurationPickerChange = viewModel::onShowDurationPickerChange,
+            onShowDatePickerChange = viewModel::onShowDatePickerChange,
         )
     }
 }

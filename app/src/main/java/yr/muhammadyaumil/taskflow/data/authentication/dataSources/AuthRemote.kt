@@ -14,31 +14,30 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
-import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
-import yr.muhammadyaumil.taskflow.data.authentication.models.LogoutResult
 import yr.muhammadyaumil.taskflow.data.authentication.models.UserData
 import javax.inject.Inject
 
 interface AuthRemote {
-    suspend fun signInWithGoogle(): AuthResult
+    suspend fun signInWithGoogle()
 
-    suspend fun signInWithUsernameAndPassword(username: String, password: String): AuthResult
+    suspend fun signInWithUsernameAndPassword(username: String, password: String)
 
     suspend fun signUpWithEmailAndPassword(
         email: String,
         username: String,
         password: String
-    ): AuthResult
+    )
 
-    suspend fun signOut(): LogoutResult
+    suspend fun signOut()
 
     fun isLoggedIn(): Boolean
 
-    fun getUserDisplayName(): AuthResult
+    fun getUserData(): UserData
 }
 
-class AuthRemoteImpl @Inject constructor(@ApplicationContext private val context: Context) :
-    AuthRemote {
+class AuthRemoteImpl @Inject constructor(
+    @ApplicationContext private val context: Context
+) : AuthRemote {
     private val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val credentialManager: CredentialManager by lazy { CredentialManager.create(context) }
     private val getGoogleIdOption: GetGoogleIdOption by lazy {
@@ -55,7 +54,7 @@ class AuthRemoteImpl @Inject constructor(@ApplicationContext private val context
             .build()
     }
 
-    override suspend fun signInWithGoogle(): AuthResult {
+    override suspend fun signInWithGoogle() {
         val mutableWrapper = MutableContextWrapper(context)
 
         val credential = credentialManager.getCredential(
@@ -93,14 +92,9 @@ class AuthRemoteImpl @Inject constructor(@ApplicationContext private val context
                 .update("confirmationStatus", true)
                 .await()
         }
-
-        return AuthResult(userData = userData)
     }
 
-    override suspend fun signInWithUsernameAndPassword(
-        username: String,
-        password: String
-    ): AuthResult {
+    override suspend fun signInWithUsernameAndPassword(username: String, password: String) {
         val querySnapshot = firestoreDb.collection("users")
             .whereEqualTo("username", username)
             .limit(1)
@@ -108,62 +102,38 @@ class AuthRemoteImpl @Inject constructor(@ApplicationContext private val context
             .await()
 
         if (querySnapshot.isEmpty) {
-            return AuthResult(errorMessage = "Username tidak ditemukan")
+            throw Exception("Username tidak ditemukan")
         }
 
         val userDocument = querySnapshot.documents.first()
         val email = userDocument.getString("email") ?: ""
 
         if (email.isEmpty()) {
-            return AuthResult(errorMessage = "Data email tidak valid")
+            throw Exception("Data email tidak valid")
         }
 
         val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-        val user = authResult.user
-            ?: return AuthResult(errorMessage = "User tidak ditemukan di autentikasi")
+        val user = authResult.user ?: throw Exception("User tidak ditemukan di autentikasi")
 
         user.reload().await()
 
-        return if (user.isEmailVerified) {
+        if (user.isEmailVerified) {
             firestoreDb.collection("users")
                 .document(user.uid)
                 .update("confirmationStatus", true)
                 .await()
-
-            AuthResult(successLogin = true)
         } else {
             firebaseAuth.signOut()
-            AuthResult(errorMessage = "Email belum di konfirmasi. Silakan cek kotak masuk Anda.")
+            throw Exception("Email belum di konfirmasi. Silakan cek kotak masuk Anda.")
         }
-    }
-
-    override fun isLoggedIn(): Boolean = firebaseAuth.currentUser != null
-    override fun getUserDisplayName(): AuthResult {
-        val getUserData = firebaseAuth.currentUser
-        val resultUser = UserData(
-            username = getUserData?.displayName,
-            email = getUserData?.email,
-            profilePicture = getUserData?.photoUrl
-        )
-        return AuthResult(userData = resultUser)
-    }
-
-    override suspend fun signOut(): LogoutResult {
-        firebaseAuth.signOut()
-        credentialManager.clearCredentialState(ClearCredentialStateRequest())
-        return LogoutResult(successLogout = "Sucessfully Logout")
     }
 
     override suspend fun signUpWithEmailAndPassword(
         email: String,
         username: String,
-        password: String,
-    ): AuthResult {
-        val authResult = firebaseAuth.createUserWithEmailAndPassword(
-            email,
-            password
-        ).await()
-
+        password: String
+    ) {
+        val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
         val user = authResult.user ?: throw Exception("Gagal membuat user, data null")
 
         user.sendEmailVerification().await()
@@ -184,7 +154,21 @@ class AuthRemoteImpl @Inject constructor(@ApplicationContext private val context
             .document(user.uid)
             .set(saveUser)
             .await()
+    }
 
-        return AuthResult(successRegistration = true)
+    override suspend fun signOut() {
+        firebaseAuth.signOut()
+        credentialManager.clearCredentialState(ClearCredentialStateRequest())
+    }
+
+    override fun isLoggedIn(): Boolean = firebaseAuth.currentUser != null
+
+    override fun getUserData(): UserData {
+        val firebaseUser = firebaseAuth.currentUser
+        return UserData(
+            username = firebaseUser?.displayName,
+            email = firebaseUser?.email,
+            profilePicture = firebaseUser?.photoUrl
+        )
     }
 }

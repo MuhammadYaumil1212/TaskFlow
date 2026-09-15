@@ -19,18 +19,19 @@ fun EntryProviderScope<NavKey>.trackerRoute(backStack: NavBackStack<NavKey>) {
 
     entry<TrackerRoute> {
         val viewModel: TrackerViewModel = hiltViewModel()
-        val logoutResult by viewModel.logoutResult.collectAsStateWithLifecycle()
-        val authResult by viewModel.getUserData.collectAsStateWithLifecycle()
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-        LaunchedEffect(logoutResult) {
-            if (logoutResult is Response.Success) {
+        LaunchedEffect(uiState.isLogoutSuccess) {
+            if (uiState.isLogoutSuccess) {
                 backStack.clear()
                 backStack.add(SignInRoute)
             }
         }
 
         TrackerScreen(
-            authState = authResult,
+            userData = uiState.userData,
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.errorMessage,
             goToProfile = { backStack.add(ProfileRoute) }
         )
     }

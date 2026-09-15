@@ -6,39 +6,70 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yr.muhammadyaumil.taskflow.core.response.Response
-import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
-import yr.muhammadyaumil.taskflow.data.authentication.models.LogoutResult
 import yr.muhammadyaumil.taskflow.data.authentication.repository.AuthenticationRepository
 import javax.inject.Inject
 
+
 @HiltViewModel
 class TrackerViewModel @Inject constructor(
-    private val signInRepository: AuthenticationRepository
+    private val authenticationRepository: AuthenticationRepository
 ) : ViewModel() {
-    private val _logoutResult = MutableStateFlow<Response<LogoutResult>?>(null)
-    val logoutResult: StateFlow<Response<LogoutResult>?> = _logoutResult.asStateFlow()
 
-    private val _getUserData = MutableStateFlow<Response<AuthResult>?>(null)
-    val getUserData: StateFlow<Response<AuthResult>?> = _getUserData.asStateFlow()
+    private val _uiState = MutableStateFlow(TrackerUiState())
+    val uiState: StateFlow<TrackerUiState> = _uiState.asStateFlow()
 
     init {
-        getUserDisplayName()
+        fetchUserData()
     }
 
-    fun logout() {
-        viewModelScope.launch {
-            _logoutResult.value = Response.Loading
-            val result = signInRepository.logout()
-            _logoutResult.value = result
+    fun logout() = viewModelScope.launch {
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+        when (val result = authenticationRepository.logout()) {
+            is Response.Success -> {
+                _uiState.update {
+                    it.copy(isLoading = false, isLogoutSuccess = true)
+                }
+            }
+
+            is Response.Error -> {
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = result.message)
+                }
+            }
+
+            else -> {
+                _uiState.update { it.copy(isLoading = false) }
+            }
         }
     }
 
-    private fun getUserDisplayName() = viewModelScope.launch {
-        _getUserData.value = Response.Loading
-        val getUserData = signInRepository.getUserDisplayName()
-        _getUserData.value = getUserData
+    private fun fetchUserData() {
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+        when (val response = authenticationRepository.getUserData()) {
+            is Response.Success -> {
+                _uiState.update {
+                    it.copy(isLoading = false, userData = response.data)
+                }
+            }
+
+            is Response.Error -> {
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = response.message)
+                }
+            }
+
+            else -> {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun clearErrorMessage() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 }

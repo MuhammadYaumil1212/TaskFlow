@@ -21,8 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import yr.muhammadyaumil.taskflow.core.response.Response
-import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
+import yr.muhammadyaumil.taskflow.data.authentication.models.UserData
 import yr.muhammadyaumil.taskflow.presentations.components.LoadingSpinner
 import yr.muhammadyaumil.taskflow.presentations.ui.Tracker.components.HabitItem
 import yr.muhammadyaumil.taskflow.presentations.ui.Tracker.components.Header
@@ -33,7 +32,9 @@ import java.util.Locale
 
 @Composable
 fun TrackerScreen(
-    authState: Response<AuthResult>?,
+    userData: UserData?,
+    isLoading: Boolean,
+    errorMessage: String?,
     modifier: Modifier = Modifier,
     goToProfile: () -> Unit
 ) {
@@ -43,10 +44,10 @@ fun TrackerScreen(
         mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE", localeID)))
     }
 
-    LaunchedEffect(authState) {
-        if (authState is Response.Error) {
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { msg ->
             snackbarHostState.showSnackbar(
-                message = authState.message,
+                message = msg,
                 duration = SnackbarDuration.Short
             )
         }
@@ -68,7 +69,8 @@ fun TrackerScreen(
                 item {
                     Header(
                         goToProfile = goToProfile,
-                        displayName = if (authState is Response.Success) authState.data.userData?.username else null,
+                        // Mengambil nilai username langsung dari userData secara aman (safe call)
+                        displayName = userData?.username,
                         dayName = dayName
                     )
                 }
@@ -89,8 +91,8 @@ fun TrackerScreen(
                     HabitItem()
                 }
             }
-
-            if (authState is Response.Loading) {
+            
+            if (isLoading) {
                 LoadingSpinner()
             }
         }

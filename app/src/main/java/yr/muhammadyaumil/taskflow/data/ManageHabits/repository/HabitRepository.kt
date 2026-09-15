@@ -4,6 +4,10 @@ import android.util.Log
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.ManageHabits.dataSources.HabitRemoteDataSource
 import yr.muhammadyaumil.taskflow.data.ManageHabits.models.HabitDto
@@ -12,59 +16,53 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 interface HabitRepository {
-    suspend fun createNewHabit(
-        name: String,
-        notes: String,
-        isDurationEnabled: Boolean,
-        duration: String,
-        frequency: String,
-        reminder: String,
-        isAttachmentEnabled: Boolean,
-        categoryHex: String
-    ): Response<Unit>
+    suspend fun createNewHabit(habit: HabitDto): Response<Unit>
+
+    fun getHabit(): Flow<Response<List<HabitDto>>>
 }
 
 class HabitRepositoryImpl @Inject constructor(
     private val remoteDataSource: HabitRemoteDataSource
 ) : HabitRepository {
     override suspend fun createNewHabit(
-        name: String,
-        notes: String,
-        isDurationEnabled: Boolean,
-        duration: String,
-        frequency: String,
-        reminder: String,
-        isAttachmentEnabled: Boolean,
-        categoryHex: String
+        habit: HabitDto
     ): Response<Unit> {
         return try {
-            val newHabit = HabitDto(
-                name = name,
-                notes = notes,
-                duration = duration,
-                frequency = frequency,
-                reminder = reminder,
-                categoryHex = categoryHex
-            )
-            remoteDataSource.addHabit(newHabit)
+            remoteDataSource.addHabit(habit)
             Response.Success(Unit)
-        } catch (e: IOException) {
-            Log.e("NETWORK ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
         } catch (e: SocketTimeoutException) {
-            Log.e("SOCKET ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
+            Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
         } catch (e: UnknownHostException) {
-            Log.e("CONNECTION ERROR ", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
-        } catch (e: GetCredentialCancellationException) {
-            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "Something went wrong")
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("CONNECTION ERROR", e.localizedMessage ?: "No Internet")
+            Response.Error("Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.")
+        } catch (e: IOException) {
+            Log.e("NETWORK ERROR", e.localizedMessage ?: "Network Issue")
+            Response.Error("Terjadi gangguan jaringan. Pastikan koneksi internet stabil.")
         } catch (e: FirebaseAuthInvalidCredentialsException) {
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("AUTH ERROR", e.localizedMessage ?: "Invalid Credentials")
+            Response.Error("Email atau password yang dimasukkan salah.")
         } catch (e: Exception) {
-            Response.Error(e.localizedMessage ?: "Something went wrong")
+            Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
+            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
         }
+    }
+
+    override fun getHabit(): Flow<Response<List<HabitDto>>> = flow<Response<List<HabitDto>>> {
+        val getHabit = remoteDataSource.getHabit()
+        emit(Response.Success(getHabit))
+    }.onStart {
+        emit(Response.Loading)
+    }.catch { e ->
+        val errorTag = when (e) {
+            is SocketTimeoutException -> "SOCKET ERROR"
+            is UnknownHostException -> "CONNECTION ERROR"
+            is IOException -> "NETWORK ERROR"
+            is GetCredentialCancellationException -> "CANCELLATION ERROR"
+            else -> "GENERAL ERROR"
+        }
+        Log.e(errorTag, e.localizedMessage ?: "Something went wrong")
+        emit(Response.Error(e.localizedMessage ?: "Something went wrong"))
     }
 
 }

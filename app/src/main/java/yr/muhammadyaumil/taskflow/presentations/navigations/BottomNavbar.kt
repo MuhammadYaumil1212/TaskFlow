@@ -1,4 +1,4 @@
-package yr.muhammadyaumil.taskflow.presentations.ui.Tracker.components
+package yr.muhammadyaumil.taskflow.presentations.ui.tracker.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,7 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
-import yr.muhammadyaumil.taskflow.presentations.ui.Tracker.BottomNavItem
+import yr.muhammadyaumil.taskflow.presentations.ui.tracker.BottomNavItem
 
 @Composable
 fun BottomNavBar(

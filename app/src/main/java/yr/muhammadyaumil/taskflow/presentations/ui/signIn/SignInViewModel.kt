@@ -39,8 +39,20 @@ class SignInViewModel @Inject constructor(
 
     fun resetSuccessState() = _uiState.update { it.copy(isSignInSuccessful = false) }
 
-    private fun checkSession() {
-        _isSessionActive.value = signInRepository.isLoggedIn()
+    fun checkSession() {
+        viewModelScope.launch {
+            when (val result = signInRepository.isLoggedIn()) {
+                is Response.Success -> {
+                    _isSessionActive.value = result.data
+                }
+
+                is Response.Error -> {
+                    _isSessionActive.value = false
+                }
+
+                else -> {}
+            }
+        }
     }
 
     fun signInWithGoogle() {

@@ -19,7 +19,7 @@ interface AuthenticationRepository {
         password: String
     ): Response<Unit>
 
-    fun isLoggedIn(): Boolean
+    fun isLoggedIn(): Response<Boolean>
 
     fun getUserData(): Response<UserData>
 
@@ -90,7 +90,10 @@ class AuthenticationRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun isLoggedIn(): Boolean = authRemote.isLoggedIn()
+    override fun isLoggedIn(): Response<Boolean> {
+        val isLoggedIn = authRemote.isLoggedIn()
+        return Response.Success(isLoggedIn)
+    }
 
     override fun getUserData(): Response<UserData> {
         return try {

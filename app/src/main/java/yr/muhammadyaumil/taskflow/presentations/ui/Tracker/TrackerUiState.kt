@@ -6,5 +6,5 @@ data class TrackerUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val userData: UserData? = null,
-    val isLogoutSuccess: Boolean = false
+    val isLogoutSuccess: Boolean = false,
 )

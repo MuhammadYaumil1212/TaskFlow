@@ -21,13 +21,16 @@ class TrackerViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(TrackerUiState())
     val uiState: StateFlow<TrackerUiState> = _uiState.asStateFlow()
 
+    private val _isSessionActive = MutableStateFlow(false)
+    val isSessionActive: StateFlow<Boolean> = _isSessionActive.asStateFlow()
+
     init {
         fetchUserData()
+        checkSession()
     }
 
     fun logout() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
         when (val result = authenticationRepository.logout()) {
             is Response.Success -> {
                 _uiState.update {
@@ -43,6 +46,22 @@ class TrackerViewModel @Inject constructor(
 
             else -> {
                 _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    private fun checkSession() {
+        viewModelScope.launch {
+            when (val result = authenticationRepository.isLoggedIn()) {
+                is Response.Success -> {
+                    _isSessionActive.value = result.data
+                }
+
+                is Response.Error -> {
+                    _isSessionActive.value = false
+                }
+
+                else -> {}
             }
         }
     }

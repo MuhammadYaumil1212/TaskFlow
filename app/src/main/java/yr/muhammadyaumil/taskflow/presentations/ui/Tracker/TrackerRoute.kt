@@ -8,7 +8,6 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
-import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.presentations.ui.profile.ProfileRoute
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.SignInRoute
 
@@ -20,9 +19,17 @@ fun EntryProviderScope<NavKey>.trackerRoute(backStack: NavBackStack<NavKey>) {
     entry<TrackerRoute> {
         val viewModel: TrackerViewModel = hiltViewModel()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val isSessionActive by viewModel.isSessionActive.collectAsStateWithLifecycle()
 
         LaunchedEffect(uiState.isLogoutSuccess) {
             if (uiState.isLogoutSuccess) {
+                backStack.clear()
+                backStack.add(SignInRoute)
+            }
+        }
+
+        LaunchedEffect(!isSessionActive) {
+            if (!isSessionActive) {
                 backStack.clear()
                 backStack.add(SignInRoute)
             }

@@ -5,40 +5,41 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.authentication.dataSources.AuthRemote
-import yr.muhammadyaumil.taskflow.data.authentication.models.AuthResult
-import yr.muhammadyaumil.taskflow.data.authentication.models.LogoutResult
+import yr.muhammadyaumil.taskflow.data.authentication.models.UserData
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
 
 interface AuthenticationRepository {
-    // for sign in
-    suspend fun signInWithGoogle(): Response<AuthResult>
+    suspend fun signInWithGoogle(): Response<Unit>
+
     suspend fun signInWithUsernameAndPassword(
         username: String,
         password: String
-    ): Response<AuthResult>
+    ): Response<Unit>
 
     fun isLoggedIn(): Boolean
-    suspend fun getUserDisplayName(): Response<AuthResult>
-    suspend fun logout(): Response<LogoutResult>
 
-    //for sign up
+    fun getUserData(): Response<UserData>
+
+    suspend fun logout(): Response<Unit>
+
     suspend fun signUpWithEmailAndPassword(
         email: String,
         username: String,
         password: String,
-    ): Response<AuthResult>
-
+    ): Response<Unit>
 }
 
-class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: AuthRemote) :
-    AuthenticationRepository {
-    override suspend fun signInWithGoogle(): Response<AuthResult> {
+class AuthenticationRepositoryImpl @Inject constructor(
+    private val authRemote: AuthRemote
+) : AuthenticationRepository {
+
+    override suspend fun signInWithGoogle(): Response<Unit> {
         return try {
-            val dataResult = authRemote.signInWithGoogle()
-            return Response.Success(dataResult)
+            authRemote.signInWithGoogle()
+            Response.Success(Unit)
         } catch (e: SocketTimeoutException) {
             Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
             Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
@@ -56,21 +57,18 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
             Response.Error("Email atau password yang dimasukkan salah.")
         } catch (e: Exception) {
             Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
-            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
+            // Menggunakan e.message agar pesan error spesifik dari Remote Data Source dapat diteruskan ke UI
+            Response.Error(e.message ?: "Terjadi kesalahan sistem. Silakan coba lagi nanti.")
         }
     }
 
     override suspend fun signInWithUsernameAndPassword(
         username: String,
         password: String
-    ): Response<AuthResult> {
+    ): Response<Unit> {
         return try {
-            val result = authRemote.signInWithUsernameAndPassword(username, password)
-            if (!result.errorMessage.isNullOrEmpty()) {
-                Response.Error(result.errorMessage)
-            } else {
-                Response.Success(result)
-            }
+            authRemote.signInWithUsernameAndPassword(username, password)
+            Response.Success(Unit)
         } catch (e: SocketTimeoutException) {
             Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
             Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
@@ -88,40 +86,26 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
             Response.Error("Email atau password yang dimasukkan salah.")
         } catch (e: Exception) {
             Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
-            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
+            Response.Error(e.message ?: "Terjadi kesalahan sistem. Silakan coba lagi nanti.")
         }
     }
 
     override fun isLoggedIn(): Boolean = authRemote.isLoggedIn()
-    override suspend fun getUserDisplayName(): Response<AuthResult> {
+
+    override fun getUserData(): Response<UserData> {
         return try {
-            val getDisplay = authRemote.getUserDisplayName()
-            Response.Success(getDisplay)
-        } catch (e: SocketTimeoutException) {
-            Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
-            Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
-        } catch (e: UnknownHostException) {
-            Log.e("CONNECTION ERROR", e.localizedMessage ?: "No Internet")
-            Response.Error("Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.")
-        } catch (e: IOException) {
-            Log.e("NETWORK ERROR", e.localizedMessage ?: "Network Issue")
-            Response.Error("Terjadi gangguan jaringan. Pastikan koneksi internet stabil.")
-        } catch (e: GetCredentialCancellationException) {
-            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "User Cancelled")
-            Response.Error("Proses login dibatalkan.")
-        } catch (e: FirebaseAuthInvalidCredentialsException) {
-            Log.e("AUTH ERROR", e.localizedMessage ?: "Invalid Credentials")
-            Response.Error("Email atau password yang dimasukkan salah.")
+            val userData = authRemote.getUserData()
+            Response.Success(userData)
         } catch (e: Exception) {
             Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
-            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
+            Response.Error(e.message ?: "Gagal mengambil data user.")
         }
     }
 
-    override suspend fun logout(): Response<LogoutResult> {
+    override suspend fun logout(): Response<Unit> {
         return try {
-            val logoutResult = authRemote.signOut()
-            return Response.Success(logoutResult)
+            authRemote.signOut()
+            Response.Success(Unit)
         } catch (e: SocketTimeoutException) {
             Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
             Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
@@ -131,15 +115,9 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
         } catch (e: IOException) {
             Log.e("NETWORK ERROR", e.localizedMessage ?: "Network Issue")
             Response.Error("Terjadi gangguan jaringan. Pastikan koneksi internet stabil.")
-        } catch (e: GetCredentialCancellationException) {
-            Log.e("CANCELLATION ERROR", e.localizedMessage ?: "User Cancelled")
-            Response.Error("Proses login dibatalkan.")
-        } catch (e: FirebaseAuthInvalidCredentialsException) {
-            Log.e("AUTH ERROR", e.localizedMessage ?: "Invalid Credentials")
-            Response.Error("Email atau password yang dimasukkan salah.")
         } catch (e: Exception) {
             Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
-            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
+            Response.Error(e.message ?: "Terjadi kesalahan sistem saat proses logout.")
         }
     }
 
@@ -147,14 +125,14 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
         email: String,
         username: String,
         password: String,
-    ): Response<AuthResult> {
+    ): Response<Unit> {
         return try {
-            val regisUser = authRemote.signUpWithEmailAndPassword(
+            authRemote.signUpWithEmailAndPassword(
                 email = email,
                 username = username,
                 password = password,
             )
-            Response.Success(regisUser)
+            Response.Success(Unit)
         } catch (e: SocketTimeoutException) {
             Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
             Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
@@ -166,13 +144,13 @@ class AuthenticationRepositoryImpl @Inject constructor(private val authRemote: A
             Response.Error("Terjadi gangguan jaringan. Pastikan koneksi internet stabil.")
         } catch (e: GetCredentialCancellationException) {
             Log.e("CANCELLATION ERROR", e.localizedMessage ?: "User Cancelled")
-            Response.Error("Proses login dibatalkan.")
+            Response.Error("Proses registrasi dibatalkan.")
         } catch (e: FirebaseAuthInvalidCredentialsException) {
             Log.e("AUTH ERROR", e.localizedMessage ?: "Invalid Credentials")
-            Response.Error("Email atau password yang dimasukkan salah.")
+            Response.Error("Format email tidak valid atau sudah digunakan.")
         } catch (e: Exception) {
             Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
-            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
+            Response.Error(e.message ?: "Terjadi kesalahan sistem. Silakan coba lagi nanti.")
         }
     }
 }

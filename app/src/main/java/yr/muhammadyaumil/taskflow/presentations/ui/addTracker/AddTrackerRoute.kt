@@ -44,6 +44,7 @@ fun EntryProviderScope<NavKey>.addTrackerRoute(backStackEntry: NavBackStack<NavK
             showTimePicker = uiState.showTimePicker,
             showDurationPicker = uiState.showDurationPicker,
             showDatePicker = uiState.showDatePicker,
+            categories = uiState.categories,
             onBack = {
                 backStackEntry.clear()
                 backStackEntry.add(TrackerRoute)

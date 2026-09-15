@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import yr.muhammadyaumil.taskflow.data.authentication.models.UserData
@@ -86,6 +87,23 @@ class AuthRemoteImpl @Inject constructor(
                 .document(user.uid)
                 .set(userData)
                 .await()
+
+            val categories = listOf(
+                "KESEHATAN" to "#9DB499",
+                "PIKIRAN" to "#E8C7AC",
+                "FOKUS" to "#B5D2E8",
+                "FISIK" to "#D9C6E8"
+            )
+
+            firestoreDb.collection("users")
+                .document(user.uid)
+                .set(
+                    mapOf(
+                        "categories" to categories.toMap()
+                    ),
+                    SetOptions.merge()
+                )
+                .await()
         } else {
             firestoreDb.collection("users")
                 .document(user.uid)
@@ -153,6 +171,23 @@ class AuthRemoteImpl @Inject constructor(
         firestoreDb.collection("users")
             .document(user.uid)
             .set(saveUser)
+            .await()
+
+        val categories = listOf(
+            "KESEHATAN" to "#9DB499",
+            "PIKIRAN" to "#E8C7AC",
+            "FOKUS" to "#B5D2E8",
+            "FISIK" to "#D9C6E8"
+        )
+
+        firestoreDb.collection("users")
+            .document(user.uid)
+            .set(
+                mapOf(
+                    "categories" to categories.toMap()
+                ),
+                SetOptions.merge()
+            )
             .await()
     }
 

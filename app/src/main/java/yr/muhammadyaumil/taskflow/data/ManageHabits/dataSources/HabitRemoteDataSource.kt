@@ -1,13 +1,16 @@
 package yr.muhammadyaumil.taskflow.data.ManageHabits.dataSources
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
+import yr.muhammadyaumil.taskflow.data.ManageHabits.models.CategoryDto
 import yr.muhammadyaumil.taskflow.data.ManageHabits.models.HabitDto
 
 interface HabitRemoteDataSource {
     suspend fun addHabit(habit: HabitDto)
+    suspend fun getCategoryHabit(): List<CategoryDto>
     suspend fun getHabit(): List<HabitDto>
 }
 
@@ -27,6 +30,42 @@ class HabitRemoteDataSourceImpl @Inject constructor(
 
         val habitWithId = habit.copy(id = documentRef.id)
         documentRef.set(habitWithId).await()
+    }
+
+    override suspend fun getCategoryHabit(): List<CategoryDto> {
+        val user = FirebaseAuth.getInstance().currentUser
+
+        return if (user != null) {
+            val snapshot = firestore
+                .collection("users")
+                .document(user.uid)
+                .get()
+                .await()
+
+            (snapshot.get("categories") as? Map<*, *>)
+                ?.mapNotNull { (key, value) ->
+                    val name = key as? String
+                    val color = value as? String
+
+                    Log.d(
+                        "SnapshotCategory",
+                        "name=$name, color=$color"
+                    )
+
+                    if (name != null && color != null) {
+                        CategoryDto(
+                            name = name,
+                            color = color
+                        )
+                    } else {
+                        null
+                    }
+                }
+                ?: emptyList()
+
+        } else {
+            emptyList()
+        }
     }
 
     override suspend fun getHabit(): List<HabitDto> {

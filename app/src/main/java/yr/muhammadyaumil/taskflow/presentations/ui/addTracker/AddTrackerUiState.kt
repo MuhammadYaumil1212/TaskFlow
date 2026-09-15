@@ -1,5 +1,6 @@
 package yr.muhammadyaumil.taskflow.presentations.ui.addTracker
 
+import yr.muhammadyaumil.taskflow.data.ManageHabits.models.CategoryDto
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -22,5 +23,6 @@ data class AddTrackerUiState(
     val showDurationPicker: Boolean = false,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val isSavedSuccess: Boolean = false
+    val isSavedSuccess: Boolean = false,
+    val categories: List<CategoryDto> = emptyList()
 )

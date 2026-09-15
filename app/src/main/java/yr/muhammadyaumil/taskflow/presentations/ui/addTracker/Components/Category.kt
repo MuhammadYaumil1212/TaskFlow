@@ -28,11 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import yr.muhammadyaumil.taskflow.data.ManageHabits.models.CategoryDto
 
 @Composable
 fun Category(
     modifier: Modifier = Modifier,
-    categories: List<Pair<String, String>>,
+    categories: List<CategoryDto>,
     selectedCategoryHex: String,
     onCategoryChange: (String) -> Unit,
     onAddCategoryClick: () -> Unit

@@ -1,5 +1,6 @@
 package yr.muhammadyaumil.taskflow.presentations.ui.addTracker
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,6 +44,41 @@ class AddTrackerViewModel @Inject constructor(
 
     fun onHabitDateChange(date: Long) = _uiState.update { it.copy(habitDate = date) }
     fun onShowDatePickerChange(show: Boolean) = _uiState.update { it.copy(showDatePicker = show) }
+
+    init {
+        getCategoryHabit()
+    }
+
+    fun getCategoryHabit() = viewModelScope.launch {
+        habitRepository.getCategoryHabit().collect { response ->
+            when (response) {
+                is Response.Loading -> {
+                    _uiState.update {
+                        it.copy(isLoading = true)
+                    }
+                }
+
+                is Response.Success -> {
+                    Log.d("GET CAT", "Get categories : ${response.data}")
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            categories = response.data
+                        )
+                    }
+                }
+
+                is Response.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = response.message
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     fun saveHabit() {
         val currentState = _uiState.value

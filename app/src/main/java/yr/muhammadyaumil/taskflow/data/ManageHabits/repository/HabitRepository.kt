@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.ManageHabits.dataSources.HabitRemoteDataSource
+import yr.muhammadyaumil.taskflow.data.ManageHabits.models.CategoryDto
 import yr.muhammadyaumil.taskflow.data.ManageHabits.models.HabitDto
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -17,7 +18,7 @@ import java.net.UnknownHostException
 
 interface HabitRepository {
     suspend fun createNewHabit(habit: HabitDto): Response<Unit>
-
+    suspend fun getCategoryHabit(): Flow<Response<List<CategoryDto>>>
     fun getHabit(): Flow<Response<List<HabitDto>>>
 }
 
@@ -47,6 +48,24 @@ class HabitRepositoryImpl @Inject constructor(
             Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
         }
     }
+
+    override suspend fun getCategoryHabit(): Flow<Response<List<CategoryDto>>> =
+        flow<Response<List<CategoryDto>>> {
+            val getCategoryHabits = remoteDataSource.getCategoryHabit()
+            emit(Response.Success(getCategoryHabits))
+        }.onStart {
+            emit(Response.Loading)
+        }.catch { e ->
+            val errorTag = when (e) {
+                is SocketTimeoutException -> "SOCKET ERROR"
+                is UnknownHostException -> "CONNECTION ERROR"
+                is IOException -> "NETWORK ERROR"
+                is GetCredentialCancellationException -> "CANCELLATION ERROR"
+                else -> "GENERAL ERROR"
+            }
+            Log.e(errorTag, e.localizedMessage ?: "Something went wrong")
+            emit(Response.Error(e.localizedMessage ?: "Something went wrong"))
+        }
 
     override fun getHabit(): Flow<Response<List<HabitDto>>> = flow<Response<List<HabitDto>>> {
         val getHabit = remoteDataSource.getHabit()

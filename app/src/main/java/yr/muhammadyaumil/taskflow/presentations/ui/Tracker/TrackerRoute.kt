@@ -39,6 +39,7 @@ fun EntryProviderScope<NavKey>.trackerRoute(backStack: NavBackStack<NavKey>) {
             userData = uiState.userData,
             isLoading = uiState.isLoading,
             errorMessage = uiState.errorMessage,
+            nearestHabit = uiState.nearestHabitList,
             goToProfile = { backStack.add(ProfileRoute) }
         )
     }

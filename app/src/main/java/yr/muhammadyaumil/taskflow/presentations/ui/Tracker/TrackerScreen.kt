@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -21,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import yr.muhammadyaumil.taskflow.core.color.toComposeColor
+import yr.muhammadyaumil.taskflow.data.ManageHabits.models.HabitDto
 import yr.muhammadyaumil.taskflow.data.authentication.models.UserData
 import yr.muhammadyaumil.taskflow.presentations.components.LoadingSpinner
 import yr.muhammadyaumil.taskflow.presentations.ui.Tracker.components.HabitItem
@@ -35,6 +39,7 @@ fun TrackerScreen(
     userData: UserData?,
     isLoading: Boolean,
     errorMessage: String?,
+    nearestHabit: List<HabitDto>,
     modifier: Modifier = Modifier,
     goToProfile: () -> Unit
 ) {
@@ -69,7 +74,6 @@ fun TrackerScreen(
                 item {
                     Header(
                         goToProfile = goToProfile,
-                        // Mengambil nilai username langsung dari userData secara aman (safe call)
                         displayName = userData?.username,
                         dayName = dayName
                     )
@@ -87,11 +91,17 @@ fun TrackerScreen(
                         modifier = Modifier.padding(bottom = 5.dp)
                     )
                 }
-                items(10) {
-                    HabitItem()
+                items(items = nearestHabit, key = { habit -> habit.id }) { habit ->
+                    HabitItem(
+                        title = habit.name,
+                        subtitle = habit.notes,
+                        color = habit.categoryHex.toComposeColor(
+                            defaultColor = MaterialTheme.colorScheme.surface
+                        )
+                    )
                 }
             }
-            
+
             if (isLoading) {
                 LoadingSpinner()
             }

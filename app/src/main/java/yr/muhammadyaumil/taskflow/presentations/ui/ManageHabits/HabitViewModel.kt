@@ -11,10 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.ManageHabits.repository.HabitRepository
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,17 +35,25 @@ class HabitViewModel @Inject constructor(private val habitRepository: HabitRepos
                 }
 
                 is Response.Success -> {
-                    Log.d("FIRESTORE_SUCCESS", "Berhasil load data : ${response.data.size}")
                     _uiState.update {
                         val rawHabits = response.data
-                        val currentTime =
-                            SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+
+                        val today = Calendar.getInstance()
+
                         val sortedAllList = rawHabits.sortedBy { habit ->
                             habit.reminder
                         }
+
                         val todayList = sortedAllList.filter { habit ->
-                            habit.reminder >= currentTime
+                            val habitDate = Calendar.getInstance().apply {
+                                timeInMillis = habit.date
+                            }
+
+                            habitDate.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+                                    habitDate.get(Calendar.MONTH) == today.get(Calendar.MONTH) &&
+                                    habitDate.get(Calendar.DAY_OF_MONTH) == today.get(Calendar.DAY_OF_MONTH)
                         }
+
                         it.copy(
                             isLoading = false,
                             todayHabits = todayList,

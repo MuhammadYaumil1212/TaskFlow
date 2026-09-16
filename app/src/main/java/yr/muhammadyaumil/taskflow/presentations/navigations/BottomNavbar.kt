@@ -67,14 +67,6 @@ fun BottomNavBar(
                             contentDescription = item.title,
                             tint = contentColor
                         )
-//                        if (isSelected) {
-//                            Spacer(modifier = Modifier.width(8.dp))
-//                            Text(
-//                                text = item.title,
-//                                color = contentColor,
-//                                style = MaterialTheme.typography.labelMedium
-//                            )
-//                        }
                     }
                 }
             }

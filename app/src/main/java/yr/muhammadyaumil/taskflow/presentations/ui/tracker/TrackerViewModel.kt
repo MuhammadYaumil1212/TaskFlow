@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.ManageHabits.repository.HabitRepository
 import yr.muhammadyaumil.taskflow.data.authentication.repository.AuthenticationRepository
-import java.util.Calendar
 import javax.inject.Inject
 
 
@@ -103,39 +102,16 @@ class TrackerViewModel @Inject constructor(
 
                 is Response.Success -> {
                     val rawHabits = response.data
-
-                    val today = Calendar.getInstance().apply {
-                        set(Calendar.HOUR_OF_DAY, 0)
-                        set(Calendar.MINUTE, 0)
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
+                    
+                    val todayHabits = rawHabits.sortedBy { habit ->
+                        habit.date
                     }
-
-                    val threeDaysLater = today.clone() as Calendar
-                    threeDaysLater.add(Calendar.DAY_OF_YEAR, 3)
-
-                    val nearestHabits = rawHabits
-                        .filter { habit ->
-                            val habitDate = Calendar.getInstance().apply {
-                                timeInMillis = habit.date
-                                set(Calendar.HOUR_OF_DAY, 0)
-                                set(Calendar.MINUTE, 0)
-                                set(Calendar.SECOND, 0)
-                                set(Calendar.MILLISECOND, 0)
-                            }
-
-                            habitDate.timeInMillis in
-                                    today.timeInMillis..threeDaysLater.timeInMillis
-                        }
-                        .sortedBy { habit ->
-                            habit.date
-                        }
 
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             isRefreshing = false,
-                            nearestHabitList = nearestHabits
+                            todayHabits = todayHabits
                         )
                     }
                 }

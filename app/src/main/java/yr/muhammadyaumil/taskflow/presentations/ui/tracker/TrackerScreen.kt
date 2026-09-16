@@ -30,7 +30,9 @@ import yr.muhammadyaumil.taskflow.data.authentication.models.UserData
 import yr.muhammadyaumil.taskflow.presentations.ui.tracker.components.HabitItem
 import yr.muhammadyaumil.taskflow.presentations.ui.tracker.components.Header
 import yr.muhammadyaumil.taskflow.presentations.ui.tracker.components.HorizontalDatePicker
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -40,15 +42,28 @@ fun TrackerScreen(
     errorMessage: String?,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    nearestHabit: List<HabitDto>,
+    todayHabits: List<HabitDto>,
     modifier: Modifier = Modifier,
     goToProfile: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val state = rememberPullToRefreshState()
     val localeID = remember { Locale("id", "ID") }
-    var dayName by remember {
-        mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE", localeID)))
+
+    var selectedDate by remember {
+        mutableStateOf(LocalDate.now())
+    }
+
+    val dayName = selectedDate.format(
+        DateTimeFormatter.ofPattern("EEEE", localeID)
+    )
+
+    val selectedDateHabits = todayHabits.filter { habit ->
+        val habitDate = Instant
+            .ofEpochMilli(habit.date)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+        habitDate == selectedDate
     }
 
     LaunchedEffect(errorMessage) {
@@ -62,7 +77,9 @@ fun TrackerScreen(
 
     Scaffold(
         modifier = modifier,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
     ) { innerPadding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -85,20 +102,33 @@ fun TrackerScreen(
                         dayName = dayName
                     )
                 }
+
                 item {
                     HorizontalDatePicker { localDate ->
-                        dayName = localDate.format(DateTimeFormatter.ofPattern("EEEE", localeID))
+                        selectedDate = localDate
                     }
                 }
+
                 item {
                     Text(
-                        text = "Kegiatan Terdekat",
+                        text = "Kegiatan ${
+                            selectedDate.format(
+                                DateTimeFormatter.ofPattern(
+                                    "d MMMM yyyy",
+                                    localeID
+                                )
+                            )
+                        }",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.W600,
                         modifier = Modifier.padding(bottom = 5.dp)
                     )
                 }
-                items(items = nearestHabit, key = { habit -> habit.id }) { habit ->
+
+                items(
+                    items = selectedDateHabits,
+                    key = { habit -> habit.id }
+                ) { habit ->
                     HabitItem(
                         title = habit.name,
                         subtitle = habit.notes,

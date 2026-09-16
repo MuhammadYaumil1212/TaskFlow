@@ -38,7 +38,7 @@ fun EntryProviderScope<NavKey>.trackerRoute(backStack: NavBackStack<NavKey>) {
         TrackerScreen(
             userData = uiState.userData,
             errorMessage = uiState.errorMessage,
-            nearestHabit = uiState.nearestHabitList,
+            todayHabits = uiState.todayHabits,
             isRefreshing = uiState.isRefreshing,
             goToProfile = { backStack.add(ProfileRoute) },
             onRefresh = viewModel::getHabitData

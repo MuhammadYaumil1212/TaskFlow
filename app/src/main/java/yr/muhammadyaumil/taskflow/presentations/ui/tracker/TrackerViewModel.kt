@@ -92,12 +92,12 @@ class TrackerViewModel @Inject constructor(
         }
     }
 
-    private fun getHabitData() = viewModelScope.launch {
+    fun getHabitData() = viewModelScope.launch {
         habitRepository.getHabit().collect { response ->
             when (response) {
                 is Response.Loading -> {
                     _uiState.update {
-                        it.copy(isLoading = true)
+                        it.copy(isLoading = true, isRefreshing = true)
                     }
                 }
 
@@ -134,6 +134,7 @@ class TrackerViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
+                            isRefreshing = false,
                             nearestHabitList = nearestHabits
                         )
                     }
@@ -141,7 +142,11 @@ class TrackerViewModel @Inject constructor(
 
                 is Response.Error -> {
                     _uiState.update {
-                        it.copy(isLoading = false, errorMessage = response.message)
+                        it.copy(
+                            isLoading = false,
+                            isRefreshing = false,
+                            errorMessage = response.message
+                        )
                     }
                 }
             }

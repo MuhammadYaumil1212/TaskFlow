@@ -1,7 +1,6 @@
 package yr.muhammadyaumil.taskflow.presentations.ui.tracker
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,6 +12,8 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import yr.muhammadyaumil.taskflow.core.color.toComposeColor
 import yr.muhammadyaumil.taskflow.data.ManageHabits.models.HabitDto
 import yr.muhammadyaumil.taskflow.data.authentication.models.UserData
-import yr.muhammadyaumil.taskflow.presentations.components.LoadingSpinner
 import yr.muhammadyaumil.taskflow.presentations.ui.tracker.components.HabitItem
 import yr.muhammadyaumil.taskflow.presentations.ui.tracker.components.Header
 import yr.muhammadyaumil.taskflow.presentations.ui.tracker.components.HorizontalDatePicker
@@ -37,13 +37,15 @@ import java.util.Locale
 @Composable
 fun TrackerScreen(
     userData: UserData?,
-    isLoading: Boolean,
     errorMessage: String?,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     nearestHabit: List<HabitDto>,
     modifier: Modifier = Modifier,
     goToProfile: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val state = rememberPullToRefreshState()
     val localeID = remember { Locale("id", "ID") }
     var dayName by remember {
         mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE", localeID)))
@@ -62,7 +64,12 @@ fun TrackerScreen(
         modifier = modifier,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
+            state = state,
+            modifier = Modifier.fillMaxSize()
+        ) {
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 10.dp),
                 contentPadding = PaddingValues(
@@ -100,10 +107,6 @@ fun TrackerScreen(
                         )
                     )
                 }
-            }
-
-            if (isLoading) {
-                LoadingSpinner()
             }
         }
     }

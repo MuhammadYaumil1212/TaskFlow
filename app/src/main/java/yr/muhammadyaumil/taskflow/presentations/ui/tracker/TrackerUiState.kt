@@ -7,6 +7,7 @@ data class TrackerUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val userData: UserData? = null,
+    val isRefreshing: Boolean = false,
     val isLogoutSuccess: Boolean = false,
     val nearestHabitList: List<HabitDto> = emptyList()
 )

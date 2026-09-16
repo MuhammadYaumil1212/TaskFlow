@@ -17,9 +17,10 @@ fun EntryProviderScope<NavKey>.habitsRoute(backstack: NavBackStack<NavKey>) {
         val uiState by viewModel.uiState.collectAsState()
 
         ManageHabits(
-            isLoading = uiState.isLoading,
+            isRefreshing = uiState.isRefreshing,
             todayHabitList = uiState.todayHabits,
-            allHabitList = uiState.allHabits
+            allHabitList = uiState.allHabits,
+            onRefreshing = viewModel::getHabit
         )
     }
 }

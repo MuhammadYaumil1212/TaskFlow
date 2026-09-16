@@ -25,12 +25,11 @@ class HabitViewModel @Inject constructor(private val habitRepository: HabitRepos
     }
 
     fun getHabit() = viewModelScope.launch {
-        Log.d("GETTING HABIT", "habit called")
         habitRepository.getHabit().collect { response ->
             when (response) {
                 is Response.Loading -> {
                     _uiState.update {
-                        it.copy(isLoading = true, errorMessage = null)
+                        it.copy(isLoading = true, isRefreshing = true, errorMessage = null)
                     }
                 }
 
@@ -56,6 +55,7 @@ class HabitViewModel @Inject constructor(private val habitRepository: HabitRepos
 
                         it.copy(
                             isLoading = false,
+                            isRefreshing = false,
                             todayHabits = todayList,
                             allHabits = sortedAllList
                         )
@@ -67,36 +67,12 @@ class HabitViewModel @Inject constructor(private val habitRepository: HabitRepos
                     _uiState.update {
                         it.copy(
                             isLoading = false,
+                            isRefreshing = false,
                             errorMessage = response.message
                         )
                     }
                 }
             }
         }
-
-    }
-
-    private fun getStartOfDay(): Long {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return calendar.timeInMillis
-    }
-
-    private fun getEndOfDay(): Long {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 23)
-            set(Calendar.MINUTE, 59)
-            set(Calendar.SECOND, 59)
-            set(Calendar.MILLISECOND, 999)
-        }
-        return calendar.timeInMillis
-    }
-
-    fun clearErrorMessage() {
-        _uiState.update { it.copy(errorMessage = null) }
     }
 }

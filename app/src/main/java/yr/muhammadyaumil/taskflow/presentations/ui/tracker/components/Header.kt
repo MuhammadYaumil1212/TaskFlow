@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,8 +36,13 @@ fun Header(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Halo, $displayName",
-                fontSize = 18.sp,
+                text = "Halo, ${
+                    displayName
+                        ?.split(" ")
+                        ?.take(2)
+                        ?.joinToString(" ")
+                }",
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
             )
 
@@ -53,13 +59,25 @@ fun Header(
         Spacer(modifier = Modifier.width(16.dp))
 
         IconButton(
+            onClick = {},
+            modifier = Modifier.size(40.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.NotificationsNone,
+                contentDescription = "Notification Icon",
+                modifier = Modifier.size(35.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        IconButton(
             onClick = goToProfile,
-            modifier = Modifier.size(56.dp)
+            modifier = Modifier.size(40.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = "Profile Icon",
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(35.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
         }

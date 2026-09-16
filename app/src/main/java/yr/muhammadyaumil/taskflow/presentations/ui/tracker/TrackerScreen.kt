@@ -49,7 +49,6 @@ fun TrackerScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val state = rememberPullToRefreshState()
     val localeID = remember { Locale("id", "ID") }
-
     var selectedDate by remember {
         mutableStateOf(LocalDate.now())
     }

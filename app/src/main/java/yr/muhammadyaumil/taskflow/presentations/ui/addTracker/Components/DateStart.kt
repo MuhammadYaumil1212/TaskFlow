@@ -38,13 +38,13 @@ fun DateStart(
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(15.dp)
                 )
+                .fillMaxWidth()
+                .height(56.dp)
                 .clickable { onShowDatePickerChange(true) }
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,

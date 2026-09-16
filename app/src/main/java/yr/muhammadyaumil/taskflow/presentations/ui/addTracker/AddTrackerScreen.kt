@@ -1,15 +1,27 @@
 package yr.muhammadyaumil.taskflow.presentations.ui.addTracker
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -25,8 +37,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import yr.muhammadyaumil.taskflow.data.ManageHabits.models.CategoryDto
+import yr.muhammadyaumil.taskflow.presentations.components.AppTextField
 import yr.muhammadyaumil.taskflow.presentations.components.LoadingSpinner
 import yr.muhammadyaumil.taskflow.presentations.ui.addTracker.Components.Category
 import yr.muhammadyaumil.taskflow.presentations.ui.addTracker.Components.DateStart
@@ -48,6 +67,7 @@ fun AddTrackerScreen(
     isLoading: Boolean,
     habitName: String,
     habitNotes: String,
+    newCategory: String,
     isDurationEnabled: Boolean,
     habitDate: Long,
     activityDuration: String,
@@ -65,7 +85,9 @@ fun AddTrackerScreen(
     showDurationPicker: Boolean,
     onBack: () -> Unit,
     onSave: () -> Unit,
+    onSaveCategory: () -> Unit,
     categories: List<CategoryDto>,
+    onCategoryNameChanged: (String) -> Unit,
     onHabitNameChange: (String) -> Unit,
     onHabitDateChange: (Long) -> Unit,
     onHabitNotesChange: (String) -> Unit,
@@ -204,102 +226,101 @@ fun AddTrackerScreen(
         }
     }
 
-//    if (showAddCategoryDialog) {
-//        val allColors = listOf(
-//            "#9DB499", "#E8C7AC", "#B5D2E8", "#D9C6E8",
-//            "#F4A261", "#E76F51", "#2A9D8F", "#E9C46A",
-//            "#264653", "#A8DADC", "#457B9D", "#1D3557",
-//            "#D4A373", "#CCD5AE", "#E9EDC9", "#FEFAE0"
-//        )
-//
-//        val usedColors = categories.map { it.second }
-//        val availableColors = allColors.filterNot { it in usedColors }
-//
-//        var newCategoryName by remember { mutableStateOf("") }
-//        var newCategoryColor by remember {
-//            mutableStateOf(availableColors.firstOrNull() ?: "#000000")
-//        }
-//
-//        AlertDialog(
-//            onDismissRequest = { showAddCategoryDialog = false },
-//            title = { Text("Kategori Baru", fontSize = 18.sp, fontWeight = FontWeight.Bold) },
-//            text = {
-//                Column {
-//                    OutlinedTextField(
-//                        value = newCategoryName,
-//                        onValueChange = { newCategoryName = it },
-//                        label = { Text("Nama Kategori") },
-//                        singleLine = true,
-//                        modifier = Modifier.fillMaxWidth()
-//                    )
-//                    Spacer(modifier = Modifier.height(16.dp))
-//
-//                    if (availableColors.isEmpty()) {
-//                        Text(
-//                            text = "Semua warna telah digunakan",
-//                            fontSize = 14.sp,
-//                            color = MaterialTheme.colorScheme.error
-//                        )
-//                    } else {
-//                        Text("Pilih Warna", fontSize = 14.sp, fontWeight = FontWeight.W600)
-//                        Spacer(modifier = Modifier.height(8.dp))
-//
-//                        Column(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .height(180.dp)
-//                                .verticalScroll(rememberScrollState())
-//                        ) {
-//                            availableColors.chunked(4).forEach { rowColors ->
-//                                Row(
-//                                    modifier = Modifier
-//                                        .fillMaxWidth()
-//                                        .padding(vertical = 8.dp),
-//                                    horizontalArrangement = Arrangement.Start
-//                                ) {
-//                                    rowColors.forEach { hex ->
-//                                        val colorInt = hex.toColorInt()
-//                                        Box(
-//                                            modifier = Modifier
-//                                                .padding(end = 16.dp)
-//                                                .size(48.dp)
-//                                                .clip(CircleShape)
-//                                                .background(Color(colorInt))
-//                                                .border(
-//                                                    width = if (newCategoryColor == hex) 3.dp else 0.dp,
-//                                                    color = if (newCategoryColor == hex) MaterialTheme.colorScheme.primary else Color.Transparent,
-//                                                    shape = CircleShape
-//                                                )
-//                                                .clickable { newCategoryColor = hex }
-//                                        )
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            },
-//            confirmButton = {
-//                TextButton(
-//                    onClick = {
-//                        if (newCategoryName.isNotBlank() && availableColors.isNotEmpty()) {
-////                            categories.add(newCategoryName.uppercase() to newCategoryColor)
-//                            onCategoryChange(newCategoryColor)
-//                            showAddCategoryDialog = false
-//                        }
-//                    },
-//                    enabled = newCategoryName.isNotBlank() && availableColors.isNotEmpty()
-//                ) {
-//                    Text("Simpan")
-//                }
-//            },
-//            dismissButton = {
-//                TextButton(onClick = { showAddCategoryDialog = false }) {
-//                    Text("Batal")
-//                }
-//            }
-//        )
-//    }
+    if (showAddCategoryDialog) {
+        val allColors = listOf(
+            "#9DB499", "#E8C7AC", "#B5D2E8", "#D9C6E8",
+            "#F4A261", "#E76F51", "#2A9D8F", "#E9C46A",
+            "#264653", "#A8DADC", "#457B9D", "#1D3557",
+            "#D4A373", "#CCD5AE", "#E9EDC9", "#FEFAE0"
+        )
+
+        val usedColors = categories.map { it.color }
+        val availableColors = allColors.filterNot { it in usedColors }
+
+        var newCategoryColor by remember {
+            mutableStateOf(availableColors.firstOrNull() ?: "#000000")
+        }
+
+        val keyboardController = LocalSoftwareKeyboardController.current
+
+        AlertDialog(
+            onDismissRequest = { showAddCategoryDialog = false },
+            title = { Text("Kategori Baru", fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    AppTextField(
+                        hint = "Nama Kategori",
+                        onValueChanged = onCategoryNameChanged,
+                        valueText = newCategory,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (availableColors.isEmpty()) {
+                        Text(
+                            text = "Semua warna telah digunakan",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else {
+                        Text("Pilih Warna", fontSize = 14.sp, fontWeight = FontWeight.W600)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            availableColors.chunked(4).forEach { rowColors ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.Start
+                                ) {
+                                    rowColors.forEach { hex ->
+                                        val colorInt = hex.toColorInt()
+                                        Box(
+                                            modifier = Modifier
+                                                .padding(end = 16.dp)
+                                                .size(48.dp)
+                                                .clip(CircleShape)
+                                                .background(Color(colorInt))
+                                                .border(
+                                                    width = if (newCategoryColor == hex) 3.dp else 0.dp,
+                                                    color = if (newCategoryColor == hex) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                                    shape = CircleShape
+                                                )
+                                                .clickable { newCategoryColor = hex }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onCategoryChange(newCategoryColor)
+                        onSaveCategory()
+                        showAddCategoryDialog = false
+                        keyboardController?.hide()
+                    },
+                    enabled = newCategory.isNotBlank() && availableColors.isNotEmpty()
+                ) {
+                    Text("Simpan")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddCategoryDialog = false }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
 
     if (showDurationPicker) {
         DurationPickerDialog(

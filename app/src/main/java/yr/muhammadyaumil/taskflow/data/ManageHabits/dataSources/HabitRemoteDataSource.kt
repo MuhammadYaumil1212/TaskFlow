@@ -10,6 +10,7 @@ import yr.muhammadyaumil.taskflow.data.ManageHabits.models.HabitDto
 
 interface HabitRemoteDataSource {
     suspend fun addHabit(habit: HabitDto)
+    suspend fun addCategory(category: CategoryDto)
     suspend fun getCategoryHabit(): List<CategoryDto>
     suspend fun getHabit(): List<HabitDto>
 }
@@ -30,6 +31,36 @@ class HabitRemoteDataSourceImpl @Inject constructor(
 
         val habitWithId = habit.copy(id = documentRef.id)
         documentRef.set(habitWithId).await()
+    }
+
+    override suspend fun addCategory(category: CategoryDto) {
+        val userId = auth.currentUser?.uid
+            ?: throw Exception("User Belum Login")
+
+        val documentRef = firestore
+            .collection("users")
+            .document(userId)
+
+        val snapshot = documentRef.get().await()
+
+        val categories = (snapshot.get("categories") as? Map<*, *>)
+            ?.mapNotNull { (key, value) ->
+                if (key is String && value is String) {
+                    key to value
+                } else {
+                    null
+                }
+            }
+            ?.toMap()
+            ?.toMutableMap()
+            ?: mutableMapOf()
+
+        categories[category.name] = category.color
+
+        documentRef.update(
+            "categories",
+            categories
+        ).await()
     }
 
     override suspend fun getCategoryHabit(): List<CategoryDto> {

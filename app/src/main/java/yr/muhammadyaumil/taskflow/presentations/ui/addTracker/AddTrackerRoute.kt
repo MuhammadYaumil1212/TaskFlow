@@ -30,6 +30,7 @@ fun EntryProviderScope<NavKey>.addTrackerRoute(backStackEntry: NavBackStack<NavK
             habitName = uiState.habitName,
             habitNotes = uiState.habitNotes,
             habitDate = uiState.habitDate,
+            newCategory = uiState.categoryName,
             isHabitNameError = uiState.isHabitNameError,
             isHabitNotesError = uiState.isHabitNotesError,
             isLoading = uiState.isLoading,
@@ -50,6 +51,8 @@ fun EntryProviderScope<NavKey>.addTrackerRoute(backStackEntry: NavBackStack<NavK
                 backStackEntry.add(TrackerRoute)
             },
             onSave = viewModel::saveHabit,
+            onSaveCategory = viewModel::addCategory,
+            onCategoryNameChanged = viewModel::onCategoryNameChanged,
             onHabitNameChange = viewModel::onHabitNameChange,
             onHabitNotesChange = viewModel::onHabitNotesChange,
             onHabitDateChange = viewModel::onHabitDateChange,

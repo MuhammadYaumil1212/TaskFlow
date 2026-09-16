@@ -9,6 +9,7 @@ data class AddTrackerUiState(
     val habitName: String = "",
     val habitNotes: String = "",
     val habitDate: Long = System.currentTimeMillis(),
+    val categoryName: String = "",
     val isHabitNameError: Boolean = false,
     val isHabitNotesError: Boolean = false,
     val isDurationEnabled: Boolean = false,

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yr.muhammadyaumil.taskflow.core.response.Response
+import yr.muhammadyaumil.taskflow.data.ManageHabits.models.CategoryDto
 import yr.muhammadyaumil.taskflow.data.ManageHabits.models.HabitDto
 import yr.muhammadyaumil.taskflow.data.ManageHabits.repository.HabitRepository
 import javax.inject.Inject
@@ -44,6 +45,9 @@ class AddTrackerViewModel @Inject constructor(
 
     fun onHabitDateChange(date: Long) = _uiState.update { it.copy(habitDate = date) }
     fun onShowDatePickerChange(show: Boolean) = _uiState.update { it.copy(showDatePicker = show) }
+
+    fun onCategoryNameChanged(category: String) =
+        _uiState.update { it.copy(categoryName = category) }
 
     init {
         getCategoryHabit()
@@ -104,7 +108,6 @@ class AddTrackerViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             val newHabit = HabitDto(
                 name = currentState.habitName,
                 notes = currentState.habitNotes,
@@ -127,7 +130,42 @@ class AddTrackerViewModel @Inject constructor(
                     }
                 }
 
-                else -> {}
+                else -> {
+                    _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                }
+            }
+        }
+    }
+
+    fun addCategory() = viewModelScope.launch {
+        val currentState = _uiState.value
+
+        if (currentState.categoryName.isBlank()) {
+            _uiState.update {
+                it.copy(errorMessage = "Category Tidak Boleh Kosong")
+            }
+        }
+        val newCategory = CategoryDto(
+            name = currentState.categoryName,
+            color = currentState.selectedCategoryHex
+        )
+
+        when (val result = habitRepository.addCategory(newCategory)) {
+            is Response.Success -> {
+                _uiState.update {
+                    it.copy(isLoading = false)
+                }
+                getCategoryHabit()
+            }
+
+            is Response.Error -> {
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = result.message)
+                }
+            }
+
+            else -> {
+                _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             }
         }
     }

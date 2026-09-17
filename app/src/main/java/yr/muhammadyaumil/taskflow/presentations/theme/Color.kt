@@ -1,7 +1,8 @@
 package yr.muhammadyaumil.taskflow.presentations.theme
+
 import androidx.compose.ui.graphics.Color
 
-val primaryLight = Color(0xFF405F91)
+val primaryLight = Color(0xFF253C6D)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFD6E3FF)
 val onPrimaryContainerLight = Color(0xFF274777)

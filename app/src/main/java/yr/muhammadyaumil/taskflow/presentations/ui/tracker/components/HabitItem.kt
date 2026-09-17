@@ -2,6 +2,7 @@ package yr.muhammadyaumil.taskflow.presentations.ui.tracker.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,8 +16,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,12 +37,15 @@ fun HabitItem(
     modifier: Modifier = Modifier,
     title: String = "Design Landing Page",
     subtitle: String = "09:00 AM – 11:00 AM",
-    color: Color? = null
+    color: Color? = null,
+    onClick: () -> Unit
 ) {
     val iconColor = color ?: MaterialTheme.colorScheme.primary
 
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 0.dp,
@@ -109,7 +113,7 @@ fun HabitItem(
             Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = Color.Gray,
                 modifier = Modifier.size(24.dp)

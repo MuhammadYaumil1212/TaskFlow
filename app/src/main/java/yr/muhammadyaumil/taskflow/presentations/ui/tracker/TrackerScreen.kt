@@ -44,7 +44,8 @@ fun TrackerScreen(
     onRefresh: () -> Unit,
     todayHabits: List<HabitDto>,
     modifier: Modifier = Modifier,
-    goToProfile: () -> Unit
+    goToProfile: () -> Unit,
+    onClick: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val state = rememberPullToRefreshState()
@@ -129,6 +130,7 @@ fun TrackerScreen(
                     key = { habit -> habit.id }
                 ) { habit ->
                     HabitItem(
+                        onClick = onClick,
                         title = habit.name,
                         subtitle = habit.notes,
                         color = habit.categoryHex.toComposeColor(

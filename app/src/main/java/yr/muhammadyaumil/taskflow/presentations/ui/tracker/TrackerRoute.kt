@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
+import yr.muhammadyaumil.taskflow.presentations.ui.detailHabit.DetailHabitRoute
 import yr.muhammadyaumil.taskflow.presentations.ui.profile.ProfileRoute
 import yr.muhammadyaumil.taskflow.presentations.ui.signIn.SignInRoute
 
@@ -41,6 +42,7 @@ fun EntryProviderScope<NavKey>.trackerRoute(backStack: NavBackStack<NavKey>) {
             todayHabits = uiState.todayHabits,
             isRefreshing = uiState.isRefreshing,
             goToProfile = { backStack.add(ProfileRoute) },
+            onClick = { backStack.add(DetailHabitRoute) },
             onRefresh = viewModel::getHabitData
         )
     }

@@ -45,6 +45,7 @@ fun HabitItem(
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.surface,

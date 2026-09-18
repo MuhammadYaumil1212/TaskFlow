@@ -20,6 +20,7 @@ interface HabitRepository {
     suspend fun createNewHabit(habit: HabitDto): Response<Unit>
     suspend fun addCategory(habit: CategoryDto): Response<Unit>
     suspend fun getCategoryHabit(): Flow<Response<List<CategoryDto>>>
+    suspend fun getDetailHabit(docsId: String): Response<HabitDto?>
     fun getHabit(): Flow<Response<List<HabitDto>>>
 }
 
@@ -105,6 +106,28 @@ class HabitRepositoryImpl @Inject constructor(
         }
         Log.e(errorTag, e.localizedMessage ?: "Something went wrong")
         emit(Response.Error(e.localizedMessage ?: "Something went wrong"))
+    }
+
+    override suspend fun getDetailHabit(docsId: String): Response<HabitDto?> {
+        return try {
+            val getHabitById = remoteDataSource.getHabitById(docsId)
+            Response.Success(getHabitById)
+        } catch (e: SocketTimeoutException) {
+            Log.e("SOCKET ERROR", e.localizedMessage ?: "Timeout")
+            Response.Error("Koneksi internet sangat lambat. Silakan coba beberapa saat lagi.")
+        } catch (e: UnknownHostException) {
+            Log.e("CONNECTION ERROR", e.localizedMessage ?: "No Internet")
+            Response.Error("Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.")
+        } catch (e: IOException) {
+            Log.e("NETWORK ERROR", e.localizedMessage ?: "Network Issue")
+            Response.Error("Terjadi gangguan jaringan. Pastikan koneksi internet stabil.")
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Log.e("AUTH ERROR", e.localizedMessage ?: "Invalid Credentials")
+            Response.Error("Email atau password yang dimasukkan salah.")
+        } catch (e: Exception) {
+            Log.e("GENERAL ERROR", e.localizedMessage ?: "Unknown Error")
+            Response.Error("Terjadi kesalahan sistem. Silakan coba lagi nanti.")
+        }
     }
 
 }

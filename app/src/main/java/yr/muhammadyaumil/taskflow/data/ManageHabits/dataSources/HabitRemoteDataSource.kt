@@ -13,6 +13,8 @@ interface HabitRemoteDataSource {
     suspend fun addCategory(category: CategoryDto)
     suspend fun getCategoryHabit(): List<CategoryDto>
     suspend fun getHabit(): List<HabitDto>
+
+    suspend fun getHabitById(docsId: String): HabitDto?
 }
 
 class HabitRemoteDataSourceImpl @Inject constructor(
@@ -110,7 +112,29 @@ class HabitRemoteDataSourceImpl @Inject constructor(
             .await()
 
         return querySnapshot.documents.mapNotNull { document ->
-            document.toObject(HabitDto::class.java)
+            document.toObject(HabitDto::class.java)?.copy(
+                id = document.id
+            )
         }
+    }
+
+    override suspend fun getHabitById(docsId: String): HabitDto? {
+        val userId = auth.currentUser?.uid
+            ?: throw Exception("User Belum Login")
+
+        val snapshot = firestore
+            .collection("users")
+            .document(userId)
+            .collection("habits")
+            .document(docsId)
+            .get()
+            .await()
+
+        if (!snapshot.exists()) {
+            throw Exception("Habit tidak ditemukan")
+        }
+
+        return snapshot.toObject(HabitDto::class.java)
+
     }
 }

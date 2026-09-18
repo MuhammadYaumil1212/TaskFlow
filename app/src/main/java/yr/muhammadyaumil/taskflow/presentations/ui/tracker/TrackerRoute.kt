@@ -42,7 +42,7 @@ fun EntryProviderScope<NavKey>.trackerRoute(backStack: NavBackStack<NavKey>) {
             todayHabits = uiState.todayHabits,
             isRefreshing = uiState.isRefreshing,
             goToProfile = { backStack.add(ProfileRoute) },
-            onClick = { backStack.add(DetailHabitRoute) },
+            onClick = { backStack.add(DetailHabitRoute(docsId = it.id)) },
             onRefresh = viewModel::getHabitData
         )
     }

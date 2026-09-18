@@ -78,13 +78,7 @@ fun DurationPickerDialog(
                     val m = minutes.toIntOrNull() ?: 0
                     val s = seconds.toIntOrNull() ?: 0
 
-                    val result = mutableListOf<String>()
-                    if (h > 0) result.add("$h jam")
-                    if (m > 0) result.add("$m menit")
-                    if (s > 0) result.add("$s detik")
-
-                    val finalDuration =
-                        if (result.isEmpty()) "Tidak ada" else result.joinToString(" ")
+                    val finalDuration = String.format("%02d:%02d:%02d", h, m, s)
                     onSave(finalDuration)
                 }
             ) {

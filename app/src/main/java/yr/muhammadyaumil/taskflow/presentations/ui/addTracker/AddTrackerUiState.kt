@@ -13,7 +13,7 @@ data class AddTrackerUiState(
     val isHabitNameError: Boolean = false,
     val isHabitNotesError: Boolean = false,
     val isDurationEnabled: Boolean = false,
-    val activityDuration: String = "Tidak ada",
+    val activityDuration: String = "00:00:00",
     val showDatePicker: Boolean = false,
     val frequency: String = "Setiap Hari",
     val reminder: String = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()),

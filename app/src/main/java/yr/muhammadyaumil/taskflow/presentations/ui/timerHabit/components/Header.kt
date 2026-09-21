@@ -28,12 +28,12 @@ fun Header(
     ) {
         IconButton(
             onClick = onBack,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(30.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBackIosNew,
                 contentDescription = "Back",
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(25.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -45,12 +45,12 @@ fun Header(
         ) {
             IconButton(
                 onClick = {},
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(30.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.NotificationsNone,
                     contentDescription = "Notification",
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(25.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }

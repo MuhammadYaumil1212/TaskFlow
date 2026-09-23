@@ -8,7 +8,6 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
-import yr.muhammadyaumil.taskflow.presentations.ui.tracker.TrackerRoute
 
 @Serializable
 data class TimerHabitRoute(
@@ -27,10 +26,7 @@ fun EntryProviderScope<NavKey>.timerHabitRoute(backStack: NavBackStack<NavKey>) 
         TimerHabitScreen(
             habit = uiState.habit,
             errorMessage = uiState.errorMessage,
-            onBack = {
-                backStack.clear()
-                backStack.add(TrackerRoute)
-            }
+            onBack = { backStack.removeLastOrNull() }
         )
     }
 }

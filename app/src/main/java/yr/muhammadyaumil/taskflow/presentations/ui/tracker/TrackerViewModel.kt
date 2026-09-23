@@ -11,6 +11,10 @@ import kotlinx.coroutines.launch
 import yr.muhammadyaumil.taskflow.core.response.Response
 import yr.muhammadyaumil.taskflow.data.ManageHabits.repository.HabitRepository
 import yr.muhammadyaumil.taskflow.data.authentication.repository.AuthenticationRepository
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Inject
 
 
@@ -96,22 +100,34 @@ class TrackerViewModel @Inject constructor(
             when (response) {
                 is Response.Loading -> {
                     _uiState.update {
-                        it.copy(isLoading = true, isRefreshing = true)
+                        it.copy(
+                            isLoading = true,
+                            isRefreshing = true
+                        )
                     }
                 }
 
                 is Response.Success -> {
                     val rawHabits = response.data
-                    
-                    val todayHabits = rawHabits.sortedBy { habit ->
-                        habit.date
-                    }
+
+                    val today = LocalDate.now()
+
+                    val todayHabits = rawHabits
+                        .filter { habit ->
+                            isHabitForDate(
+                                habitDate = habit.date,
+                                frequency = habit.frequency,
+                                targetDate = today
+                            )
+                        }
+                        .sortedBy { it.reminder }
 
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             isRefreshing = false,
-                            todayHabits = todayHabits
+                            todayHabits = todayHabits,
+                            allHabits = rawHabits
                         )
                     }
                 }
@@ -126,6 +142,71 @@ class TrackerViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun getHabitsForDate(date: LocalDate) {
+        val habits = _uiState.value.allHabits
+        val selectedHabits = habits
+            .filter { habit ->
+                isHabitForDate(
+                    habitDate = habit.date,
+                    frequency = habit.frequency,
+                    targetDate = date
+                )
+            }
+            .sortedBy { it.reminder }
+
+        _uiState.update {
+            it.copy(
+                todayHabits = selectedHabits
+            )
+        }
+    }
+}
+
+private fun isHabitForDate(
+    habitDate: Long,
+    frequency: String,
+    targetDate: LocalDate
+): Boolean {
+    val habitStartDate = Instant
+        .ofEpochMilli(habitDate)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate()
+
+    if (targetDate.isBefore(habitStartDate)) {
+        return false
+    }
+
+    return when (frequency.trim().lowercase()) {
+        "setiap hari" -> {
+            true
+        }
+
+        "hari kerja" -> {
+            targetDate.dayOfWeek in setOf(
+                DayOfWeek.MONDAY,
+                DayOfWeek.TUESDAY,
+                DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY,
+                DayOfWeek.FRIDAY
+            )
+        }
+
+        "akhir pekan" -> {
+            targetDate.dayOfWeek in setOf(
+                DayOfWeek.SATURDAY,
+                DayOfWeek.SUNDAY
+            )
+        }
+
+        "setiap minggu" -> {
+            targetDate.dayOfWeek == habitStartDate.dayOfWeek
+        }
+
+        else -> {
+            false
         }
     }
 }

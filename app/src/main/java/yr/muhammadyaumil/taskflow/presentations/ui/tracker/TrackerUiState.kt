@@ -9,5 +9,6 @@ data class TrackerUiState(
     val userData: UserData? = null,
     val isRefreshing: Boolean = false,
     val isLogoutSuccess: Boolean = false,
-    val todayHabits: List<HabitDto> = emptyList()
+    val todayHabits: List<HabitDto> = emptyList(),
+    val allHabits: List<HabitDto> = emptyList()
 )

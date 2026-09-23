@@ -26,6 +26,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import yr.muhammadyaumil.taskflow.presentations.ui.addTracker.AddTrackerRoute
 import yr.muhammadyaumil.taskflow.presentations.ui.addTracker.addTrackerRoute
+import yr.muhammadyaumil.taskflow.presentations.ui.detailhabits.detailHabitRoute
 import yr.muhammadyaumil.taskflow.presentations.ui.manageHabits.habitsRoute
 import yr.muhammadyaumil.taskflow.presentations.ui.profile.profileRoute
 import yr.muhammadyaumil.taskflow.presentations.ui.reports.reportsRoute
@@ -123,6 +124,7 @@ fun AppNavHost(modifier: Modifier = Modifier, startDestination: NavKey) {
                 habitsRoute(backStack)
                 reportsRoute(backStack)
                 timerHabitRoute(backStack)
+                detailHabitRoute(backStack)
             }
         )
     }

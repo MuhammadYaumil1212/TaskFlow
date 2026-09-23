@@ -1,5 +1,7 @@
 package yr.muhammadyaumil.taskflow.presentations.ui.tracker
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,9 +32,7 @@ import yr.muhammadyaumil.taskflow.data.authentication.models.UserData
 import yr.muhammadyaumil.taskflow.presentations.ui.tracker.components.HabitItem
 import yr.muhammadyaumil.taskflow.presentations.ui.tracker.components.Header
 import yr.muhammadyaumil.taskflow.presentations.ui.tracker.components.HorizontalDatePicker
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -43,6 +43,7 @@ fun TrackerScreen(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     todayHabits: List<HabitDto>,
+    onDateSelected: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
     goToProfile: () -> Unit,
     onClick: (HabitDto) -> Unit
@@ -58,14 +59,6 @@ fun TrackerScreen(
         DateTimeFormatter.ofPattern("EEEE", localeID)
     )
 
-    val selectedDateHabits = todayHabits.filter { habit ->
-        val habitDate = Instant
-            .ofEpochMilli(habit.date)
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
-        habitDate == selectedDate
-    }
-
     LaunchedEffect(errorMessage) {
         errorMessage?.let { msg ->
             snackbarHostState.showSnackbar(
@@ -73,6 +66,10 @@ fun TrackerScreen(
                 duration = SnackbarDuration.Short
             )
         }
+    }
+
+    LaunchedEffect(Unit) {
+        onRefresh()
     }
 
     Scaffold(
@@ -106,6 +103,7 @@ fun TrackerScreen(
                 item {
                     HorizontalDatePicker { localDate ->
                         selectedDate = localDate
+                        onDateSelected(localDate)
                     }
                 }
 
@@ -126,10 +124,24 @@ fun TrackerScreen(
                 }
 
                 items(
-                    items = selectedDateHabits,
+                    items = todayHabits,
                     key = { habit -> habit.id }
                 ) { habit ->
                     HabitItem(
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            ),
+                            fadeOutSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            ),
+                            placementSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        ),
                         onClick = { onClick(habit) },
                         title = habit.name,
                         subtitle = habit.notes,
